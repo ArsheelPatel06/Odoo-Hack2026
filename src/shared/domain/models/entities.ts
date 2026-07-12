@@ -1,26 +1,63 @@
-import type { DriverStatus, ExpenseType, MaintenanceStatus, TripStatus, UserRole, VehicleStatus, VehicleType } from "@/shared/domain/enums";
+import type { DriverStatus, ExpenseType, LicenseCategory, MaintenancePriority, MaintenanceStatus, MaintenanceType, TripStatus, UserRole, VehicleStatus, VehicleType } from "@/shared/domain/enums";
 import type { EntityId } from "@/shared/domain/types";
+
+export type VehiclePlaceholders = {
+  region?: string;
+  gpsEnabled?: boolean;
+  registrationExpiryAt?: string;
+  insuranceExpiryAt?: string;
+};
 
 export type Vehicle = {
   id: EntityId;
   registrationNumber: string;
+  name: string;
   type: VehicleType;
   status: VehicleStatus;
   capacity: number;
   odometerReading: number;
+  acquisitionCost: number;
+  isArchived: boolean;
+  archivedAt?: string;
+  placeholders?: VehiclePlaceholders;
+  documentCount: number;
   createdAt: string;
   updatedAt: string;
+};
+
+export type DriverPlaceholders = {
+  drivingExperienceYears?: number;
+  medicalCertificateStatus?: string;
+  trainingRecords?: string;
+  accidentHistory?: string;
+  emergencyContact?: string;
 };
 
 export type Driver = {
   id: EntityId;
   name: string;
+  email: string;
   phone: string;
   licenseNumber: string;
+  licenseCategory: LicenseCategory;
   licenseExpiresAt: string;
+  safetyScore: number;
   status: DriverStatus;
+  isArchived: boolean;
+  archivedAt?: string;
+  placeholders?: DriverPlaceholders;
+  documentCount: number;
   createdAt: string;
   updatedAt: string;
+};
+
+export type TripPlaceholders = {
+  gpsTracking?: string;
+  liveTracking?: string;
+  eta?: string;
+  routeOptimization?: string;
+  deliveryProof?: string;
+  customerSignature?: string;
 };
 
 export type Trip = {
@@ -29,23 +66,53 @@ export type Trip = {
   status: TripStatus;
   origin: string;
   destination: string;
+  cargoWeight: number;
+  plannedDistance: number;
   scheduledStartAt: string;
   scheduledEndAt: string;
   vehicleId?: EntityId;
   driverId?: EntityId;
+  finalOdometer?: number;
+  fuelConsumed?: number;
+  revenue?: number;
+  completionNotes?: string;
+  placeholders?: TripPlaceholders;
   createdAt: string;
   updatedAt: string;
 };
 
+export type MaintenancePlaceholders = {
+  serviceVendor?: string;
+  warranty?: string;
+  partsUsed?: string;
+  invoices?: string;
+  photos?: string;
+  checklist?: string;
+  upcomingMaintenance?: string;
+  analytics?: string;
+};
+
 export type MaintenanceLog = {
   id: EntityId;
+  maintenanceNumber: string;
   vehicleId: EntityId;
   status: MaintenanceStatus;
   title: string;
   description?: string;
-  costEstimate?: number;
+  maintenanceType: MaintenanceType;
+  priority: MaintenancePriority;
+  assignedTechnician: string;
+  estimatedCost: number;
+  actualCost?: number;
+  partsCost?: number;
+  laborCost?: number;
+  serviceNotes?: string;
+  expectedCompletionAt: string;
   openedAt: string;
   completedAt?: string;
+  placeholders?: MaintenancePlaceholders;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type FuelLog = {

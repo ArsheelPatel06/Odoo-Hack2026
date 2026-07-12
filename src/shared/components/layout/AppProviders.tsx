@@ -1,7 +1,7 @@
 "use client";
 
 import { ThemeProvider } from "next-themes";
-import { Toaster } from "sonner";
+import { DialogProvider, PermissionProvider, SessionProvider, ToastProvider } from "@/shared/providers";
 
 type AppProvidersProps = {
   children: React.ReactNode;
@@ -10,8 +10,14 @@ type AppProvidersProps = {
 export function AppProviders({ children }: AppProvidersProps) {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-      {children}
-      <Toaster richColors position="top-right" />
+      <SessionProvider>
+        <PermissionProvider>
+          <DialogProvider>
+            {children}
+            <ToastProvider />
+          </DialogProvider>
+        </PermissionProvider>
+      </SessionProvider>
     </ThemeProvider>
   );
 }

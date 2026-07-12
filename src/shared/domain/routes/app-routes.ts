@@ -7,6 +7,7 @@ export const APP_ROUTES = {
   fuel: "/fuel",
   expenses: "/expenses",
   analytics: "/analytics",
+  compliance: "/compliance",
   settings: "/settings"
 } as const;
 

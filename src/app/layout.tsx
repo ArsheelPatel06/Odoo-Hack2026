@@ -19,7 +19,7 @@ type RootLayoutProps = {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body className={inter.variable}>
         <AppProviders>{children}</AppProviders>
       </body>
