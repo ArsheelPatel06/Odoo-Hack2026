@@ -29,8 +29,8 @@ export function SidebarNav({ items, pathname, onNavigate }: SidebarNavProps) {
             href={route.route}
             onClick={onNavigate}
             className={cn(
-              "flex h-11 items-center gap-3 rounded-md px-3 text-sm text-muted transition duration-200 hover:bg-slate-700/70 hover:text-text",
-              isActive && "bg-primary/15 text-text ring-1 ring-primary/25"
+              "flex h-11 items-center gap-3 rounded-button px-3 text-sm text-muted transition duration-200 hover:bg-muted-surface hover:text-primary",
+              isActive && "bg-accent/10 text-primary ring-1 ring-accent/20"
             )}
           >
             {Icon ? <Icon className="size-4 shrink-0" /> : null}

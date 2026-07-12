@@ -1,14 +1,8 @@
-import type { InputHTMLAttributes } from "react";
-import { Search } from "lucide-react";
-import { Input } from "./Input";
+import { SearchInput } from "./InputVariants";
+import type { InputProps } from "./Input";
 
-type SearchBarProps = InputHTMLAttributes<HTMLInputElement>;
+type SearchBarProps = Omit<InputProps, "type">;
 
-export function SearchBar({ className, ...props }: SearchBarProps) {
-  return (
-    <div className="relative">
-      <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
-      <Input className={`pl-9 ${className ?? ""}`} placeholder="Search" type="search" {...props} />
-    </div>
-  );
+export function SearchBar(props: SearchBarProps) {
+  return <SearchInput className="min-w-[220px] flex-1" {...props} />;
 }

@@ -3,26 +3,77 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   --font-inter: Inter, system-ui, sans-serif;
-  --background: #0f172a;
-  --surface: #1e293b;
-  --primary: #2563eb;
+
+  /* Background */
+  --background-page: #fafafa;
+  --background-surface: #ffffff;
+  --background-card: #ffffff;
+  --background-sidebar: #f8fafc;
+  --background-popover: #ffffff;
+  --background-muted: #f1f5f9;
+
+  /* Text */
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --text-inverse: #ffffff;
+
+  /* Border */
+  --border-subtle: #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  /* Accent & states */
+  --accent: #4f46e5;
+  --accent-hover: #4338ca;
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --info: #2563eb;
+
+  /* Radius */
+  --radius-button: 12px;
+  --radius-input: 12px;
+  --radius-card: 20px;
+  --radius-dialog: 24px;
+
+  /* Shadows */
+  --shadow-soft: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+  --shadow-elevated: 0 4px 12px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.04);
+  --shadow-panel: 0 12px 32px rgba(15, 23, 42, 0.1);
+  --overlay: rgba(15, 23, 42, 0.24);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --background-page: #0b0f17;
+  --background-surface: #111827;
+  --background-card: #151c2c;
+  --background-sidebar: #0f1524;
+  --background-popover: #151c2c;
+  --background-muted: #1e293b;
+
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-inverse: #ffffff;
+
+  --border-subtle: #1e293b;
+  --border-strong: #334155;
+
+  --accent: #6366f1;
+  --accent-hover: #818cf8;
   --success: #22c55e;
   --warning: #f59e0b;
   --danger: #ef4444;
-  --text: #f8fafc;
-  --muted: #94a3b8;
-  --border: #334155;
-}
+  --info: #3b82f6;
 
-.light {
-  color-scheme: light;
-  --background: #f8fafc;
-  --surface: #ffffff;
-  --text: #0f172a;
-  --muted: #64748b;
-  --border: #e2e8f0;
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.24), 0 1px 3px rgba(0, 0, 0, 0.18);
+  --shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.28);
+  --shadow-panel: 0 18px 48px rgba(0, 0, 0, 0.35);
+  --overlay: rgba(2, 6, 23, 0.55);
 }
 
 * {
@@ -32,25 +83,137 @@
 body {
   min-height: 100vh;
   margin: 0;
-  background: var(--background);
-  color: var(--text);
+  background: var(--background-page);
+  color: var(--text-primary);
   font-family: var(--font-inter);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer components {
+  .text-display-lg {
+    font-size: 3.5rem;
+    line-height: 1.05;
+    font-weight: 700;
+  }
+
+  .text-display-md {
+    font-size: 3rem;
+    line-height: 1.08;
+    font-weight: 700;
+  }
+
+  .text-heading-xl {
+    font-size: 1.875rem;
+    line-height: 1.2;
+    font-weight: 600;
+  }
+
+  .text-heading-lg {
+    font-size: 1.5rem;
+    line-height: 1.25;
+    font-weight: 600;
+  }
+
+  .text-heading-md {
+    font-size: 1.25rem;
+    line-height: 1.3;
+    font-weight: 600;
+  }
+
+  .text-heading-sm {
+    font-size: 1.125rem;
+    line-height: 1.35;
+    font-weight: 500;
+  }
+
+  .text-body-lg {
+    font-size: 1rem;
+    line-height: 1.5;
+    font-weight: 400;
+  }
+
+  .text-body-md {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    font-weight: 400;
+  }
+
+  .text-body-sm {
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    font-weight: 400;
+  }
+
+  .text-label {
+    font-size: 0.75rem;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+
+  .text-caption {
+    font-size: 0.75rem;
+    line-height: 1.35;
+    font-weight: 400;
+  }
 }
 
 @layer utilities {
   .animate-fade-in {
-    animation: fade-in 240ms ease-out;
+    animation: fade-in 200ms ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slide-up 200ms ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scale-in 200ms ease-out;
   }
 }
 
 @keyframes fade-in {
   from {
     opacity: 0;
-    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
   }
 
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }

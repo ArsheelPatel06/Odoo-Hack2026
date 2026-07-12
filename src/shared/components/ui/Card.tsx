@@ -1,6 +1,9 @@
 import type { HTMLAttributes } from "react";
+import { cardVariants, type CardVariantProps } from "@/shared/design-system";
 import { cn } from "@/shared/lib";
 
-export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("rounded-card border border-border bg-surface p-5 shadow-panel", className)} {...props} />;
+export type CardProps = HTMLAttributes<HTMLDivElement> & CardVariantProps;
+
+export function Card({ className, padding, interactive, ...props }: CardProps) {
+  return <div className={cn(cardVariants({ padding, interactive }), className)} {...props} />;
 }

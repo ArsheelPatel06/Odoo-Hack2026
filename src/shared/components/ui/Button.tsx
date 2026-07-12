@@ -1,30 +1,47 @@
 import type { ButtonHTMLAttributes } from "react";
+import { Loader2 } from "lucide-react";
 import { Slot } from "@radix-ui/react-slot";
+import { buttonVariants, type ButtonVariantProps } from "@/shared/design-system";
 import { cn } from "@/shared/lib";
 
-type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "secondary" | "ghost" | "danger";
-  asChild?: boolean;
-};
+export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
+  ButtonVariantProps & {
+    asChild?: boolean;
+    loading?: boolean;
+  };
 
-const variants = {
-  primary: "bg-primary text-white shadow-panel hover:bg-blue-500",
-  secondary: "border border-border bg-surface text-text hover:bg-slate-700",
-  ghost: "text-muted hover:bg-surface hover:text-text",
-  danger: "bg-danger text-white hover:bg-red-500"
-};
-
-export function Button({ asChild, className, variant = "primary", ...props }: ButtonProps) {
+export function Button({
+  asChild,
+  className,
+  variant,
+  size,
+  loading,
+  disabled,
+  children,
+  ...props
+}: ButtonProps) {
   const Component = asChild ? Slot : "button";
+
+  if (asChild) {
+    return (
+      <Component
+        className={cn(buttonVariants({ variant, size }), className)}
+        {...props}
+      >
+        {children}
+      </Component>
+    );
+  }
 
   return (
     <Component
-      className={cn(
-        "inline-flex h-10 items-center justify-center gap-2 rounded-md px-4 text-sm font-medium transition disabled:pointer-events-none disabled:opacity-50",
-        variants[variant],
-        className
-      )}
+      className={cn(buttonVariants({ variant, size }), className)}
+      disabled={disabled || loading}
+      aria-busy={loading}
       {...props}
-    />
+    >
+      {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
+      {children}
+    </Component>
   );
 }

@@ -1,13 +1,16 @@
 import type { InputHTMLAttributes } from "react";
+import { inputVariants, type InputVariantProps } from "@/shared/design-system";
 import { cn } from "@/shared/lib";
 
-export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
+export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size"> &
+  InputVariantProps & {
+    error?: boolean;
+  };
+
+export function Input({ className, size, state, error, ...props }: InputProps) {
   return (
     <input
-      className={cn(
-        "h-11 w-full rounded-md border border-border bg-slate-950/40 px-3 text-sm text-text outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20",
-        className
-      )}
+      className={cn(inputVariants({ size, state: error ? "error" : state }), className)}
       {...props}
     />
   );

@@ -39,10 +39,10 @@ export function AppShell({ children }: AppShellProps) {
   }, [pathname]);
 
   return (
-    <div className="min-h-screen bg-background text-text">
-      <aside className="fixed inset-y-0 left-0 hidden w-72 border-r border-border bg-surface/85 p-5 shadow-panel backdrop-blur md:block">
+    <div className="min-h-screen bg-page text-text">
+      <aside className="fixed inset-y-0 left-0 hidden w-[260px] border-r border-subtle bg-sidebar p-5 shadow-panel md:block">
         <div className="flex items-center gap-3">
-          <div className="grid size-10 place-items-center rounded-card bg-primary text-sm font-bold text-white">TO</div>
+          <div className="grid size-10 place-items-center rounded-card bg-accent text-sm font-bold text-inverse">TO</div>
           <div>
             <div className="text-base font-semibold">TransitOps</div>
             <div className="text-xs text-muted">Operations Console</div>
@@ -61,8 +61,8 @@ export function AppShell({ children }: AppShellProps) {
         onClose={() => setMobileNavOpen(false)}
       />
 
-      <div className="min-h-screen md:pl-72">
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/85 px-5 backdrop-blur">
+      <div className="min-h-screen md:pl-[260px]">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-subtle bg-page/90 px-5 backdrop-blur">
           <div className="flex min-w-0 items-center gap-3">
             <Button
               variant="ghost"
