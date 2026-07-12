@@ -115,18 +115,44 @@ export type MaintenanceLog = {
   updatedAt: string;
 };
 
+export type FuelLogPlaceholders = {
+  invoiceUpload?: string;
+  receiptOcr?: string;
+  fuelCard?: string;
+  vendor?: string;
+  tax?: string;
+  gst?: string;
+};
+
 export type FuelLog = {
   id: EntityId;
+  fuelLogNumber: string;
   vehicleId: EntityId;
-  tripId?: EntityId;
+  tripId: EntityId;
   fuelQuantity: number;
   fuelCost: number;
   odometerReading: number;
+  fuelStation: string;
+  notes?: string;
   loggedAt: string;
+  placeholders?: FuelLogPlaceholders;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ExpensePlaceholders = {
+  receipt?: string;
+  invoiceUpload?: string;
+  receiptOcr?: string;
+  fuelCard?: string;
+  vendor?: string;
+  tax?: string;
+  gst?: string;
 };
 
 export type Expense = {
   id: EntityId;
+  expenseNumber: string;
   type: ExpenseType;
   amount: number;
   description?: string;
@@ -134,6 +160,9 @@ export type Expense = {
   vehicleId?: EntityId;
   driverId?: EntityId;
   incurredAt: string;
+  placeholders?: ExpensePlaceholders;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type Role = {

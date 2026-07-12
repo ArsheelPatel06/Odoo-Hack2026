@@ -19,12 +19,27 @@ import {
 } from "@/modules/maintenance/repositories";
 import { MaintenanceManagementService } from "@/modules/maintenance/services/maintenance-management-service";
 import {
+  InMemoryExpenseRepository,
+  InMemoryFinancialEventRepository,
+  InMemoryFuelRepository
+} from "@/modules/financial/repositories";
+import {
+  ExpenseManagementService,
+  FuelManagementService,
+  OperationalCostService
+} from "@/modules/financial/services";
+import {
   DriverAssignedToTrip,
   DriverRegistered,
+  ExpenseCreated,
+  FuelLogged,
   MaintenanceCompleted,
   MaintenanceCreated,
   MaintenanceStarted,
+  OperationalCostUpdated,
   RepairStarted,
+  ROIUpdated,
+  TripCompleted,
   TripCreated,
   TripDispatched,
   VehicleAssignedToTrip,
@@ -32,8 +47,10 @@ import {
   VehicleReturnedToFleet
 } from "@/core/events";
 import { MaintenanceStatus, TripStatus } from "@/shared/domain/enums";
+import { seedExpenses } from "@/shared/mock-data/expenses";
 import { seedFleetDrivers } from "@/shared/mock-data/drivers";
 import { seedFleetVehicles } from "@/shared/mock-data/fleet";
+import { seedFuelLogs } from "@/shared/mock-data/fuel";
 import { seedMaintenanceRecords } from "@/shared/mock-data/maintenance";
 import { seedTrips } from "@/shared/mock-data/trips";
 
@@ -115,6 +132,18 @@ for (const trip of seedTrips) {
     fleetVehicleService.recordWorkflowEvent(dispatchedEvent);
     fleetDriverService.recordWorkflowEvent(dispatchedEvent);
   }
+
+  if (trip.status === TripStatus.Completed && trip.vehicleId && trip.driverId) {
+    tripEventRepository.append(
+      trip.id,
+      TripCompleted.create({
+        tripId: trip.id,
+        vehicleId: trip.vehicleId,
+        driverId: trip.driverId,
+        timestamp: trip.updatedAt
+      })
+    );
+  }
 }
 
 export const tripManagementService = new TripManagementService(
@@ -180,14 +209,110 @@ export const maintenanceManagementService = new MaintenanceManagementService(
   fleetVehicleService
 );
 
+const fuelRepository = new InMemoryFuelRepository(seedFuelLogs);
+const expenseRepository = new InMemoryExpenseRepository(seedExpenses);
+const financialEventRepository = new InMemoryFinancialEventRepository();
+
+export const operationalCostService = new OperationalCostService(
+  fuelRepository,
+  expenseRepository,
+  maintenanceRepository,
+  tripRepository,
+  fleetVehicleService
+);
+
+export const fuelManagementService = new FuelManagementService(
+  fuelRepository,
+  financialEventRepository,
+  tripRepository,
+  fleetVehicleService,
+  operationalCostService
+);
+
+export const expenseManagementService = new ExpenseManagementService(
+  expenseRepository,
+  financialEventRepository,
+  tripRepository,
+  fleetVehicleService,
+  operationalCostService
+);
+
+for (const fuelLog of seedFuelLogs) {
+  const logged = FuelLogged.create({
+    fuelLogId: fuelLog.id,
+    vehicleId: fuelLog.vehicleId,
+    tripId: fuelLog.tripId,
+    timestamp: fuelLog.loggedAt
+  });
+  financialEventRepository.append(fuelLog.id, logged);
+  financialEventRepository.append(fuelLog.vehicleId, logged);
+  financialEventRepository.append(fuelLog.tripId, logged);
+}
+
+for (const expense of seedExpenses) {
+  const created = ExpenseCreated.create({
+    expenseId: expense.id,
+    vehicleId: expense.vehicleId,
+    tripId: expense.tripId,
+    timestamp: expense.incurredAt
+  });
+  financialEventRepository.append(expense.id, created);
+  if (expense.vehicleId) {
+    financialEventRepository.append(expense.vehicleId, created);
+  }
+  if (expense.tripId) {
+    financialEventRepository.append(expense.tripId, created);
+  }
+}
+
+for (const vehicleId of ["vehicle_001", "vehicle_002"]) {
+  const summary = operationalCostService.getVehicleCostSummary(vehicleId);
+  financialEventRepository.append(
+    vehicleId,
+    OperationalCostUpdated.create({
+      vehicleId,
+      totalCost: summary.totalCost,
+      timestamp: new Date().toISOString()
+    })
+  );
+  financialEventRepository.append(
+    vehicleId,
+    ROIUpdated.create({
+      vehicleId,
+      roi: summary.roi,
+      timestamp: new Date().toISOString()
+    })
+  );
+}
+
+const tripCostSummary = operationalCostService.getTripCostSummary("trip_003");
+financialEventRepository.append(
+  "trip_003",
+  TripCompleted.create({
+    tripId: "trip_003",
+    vehicleId: "vehicle_001",
+    driverId: "driver_001",
+    timestamp: seedTrips.find((trip) => trip.id === "trip_003")?.updatedAt ?? new Date().toISOString()
+  })
+);
+financialEventRepository.append(
+  "trip_003",
+  OperationalCostUpdated.create({
+    vehicleId: "vehicle_001",
+    tripId: "trip_003",
+    totalCost: tripCostSummary.fuelCost + tripCostSummary.otherExpenses,
+    timestamp: new Date().toISOString()
+  })
+);
+
 export const mockData = {
   dashboard: [],
   fleet: seedFleetVehicles,
   drivers: seedFleetDrivers,
   trips: seedTrips,
   maintenance: seedMaintenanceRecords,
-  fuel: [],
-  expenses: [],
+  fuel: seedFuelLogs,
+  expenses: seedExpenses,
   analytics: [],
   settings: []
 } as const;

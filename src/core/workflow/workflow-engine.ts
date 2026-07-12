@@ -1,4 +1,4 @@
-import type { Driver, MaintenanceLog, Trip, Vehicle } from "@/shared/domain/models";
+import type { Driver, Expense, FuelLog, MaintenanceLog, Trip, Vehicle } from "@/shared/domain/models";
 import { DriverStatus, MaintenanceStatus, TripStatus, VehicleStatus } from "@/shared/domain/enums";
 import {
   canAssignDriver,
@@ -6,10 +6,12 @@ import {
   canCancelTrip,
   canCloseMaintenance,
   canCompleteTrip,
+  canCreateExpense,
   canDispatchTrip,
+  canLogFuel,
   canStartMaintenance
 } from "@/core/engine";
-import { TripDispatched, TripCompleted, MaintenanceStarted, MaintenanceCompleted } from "@/core/events";
+import { TripDispatched, TripCompleted, MaintenanceStarted, MaintenanceCompleted, FuelLogged, ExpenseCreated } from "@/core/events";
 import {
   transitionDriverStatus,
   transitionMaintenanceStatus,
@@ -278,9 +280,85 @@ export function closeMaintenance(input: {
   });
 }
 
+export function logFuel(input: {
+  fuelLog: FuelLog;
+  vehicle: Vehicle;
+  trip: Trip;
+}): WorkflowResult<{
+  fuelLog: FuelLog;
+  event: ReturnType<typeof FuelLogged.create>;
+}> {
+  const validation = canLogFuel({
+    fuelLog: input.fuelLog,
+    vehicle: input.vehicle,
+    trip: input.trip
+  });
+  const error = firstError(validation);
+
+  if (error) {
+    return workflowFailure(error);
+  }
+
+  const timestamp = nowIso();
+  const fuelLog = {
+    ...input.fuelLog,
+    loggedAt: input.fuelLog.loggedAt || timestamp,
+    updatedAt: timestamp
+  };
+
+  return workflowSuccess({
+    fuelLog,
+    event: FuelLogged.create({
+      fuelLogId: fuelLog.id,
+      vehicleId: fuelLog.vehicleId,
+      tripId: fuelLog.tripId,
+      timestamp
+    })
+  });
+}
+
+export function createExpense(input: {
+  expense: Expense;
+  vehicle?: Vehicle | null;
+  trip?: Trip | null;
+}): WorkflowResult<{
+  expense: Expense;
+  event: ReturnType<typeof ExpenseCreated.create>;
+}> {
+  const validation = canCreateExpense({
+    expense: input.expense,
+    vehicle: input.vehicle,
+    trip: input.trip
+  });
+  const error = firstError(validation);
+
+  if (error) {
+    return workflowFailure(error);
+  }
+
+  const timestamp = nowIso();
+  const expense = {
+    ...input.expense,
+    incurredAt: input.expense.incurredAt || timestamp,
+    updatedAt: timestamp
+  };
+
+  return workflowSuccess({
+    expense,
+    event: ExpenseCreated.create({
+      expenseId: expense.id,
+      vehicleId: expense.vehicleId,
+      tripId: expense.tripId,
+      timestamp
+    })
+  });
+}
+
 export {
   calculateFuelEfficiency,
   calculateOperationalCost,
   calculateROI,
+  calculateTripMargin,
+  calculateTripProfit,
   calculateVehicleROI
 } from "@/core/calculations";

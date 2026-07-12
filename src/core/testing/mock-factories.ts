@@ -1,5 +1,5 @@
-import type { Driver, MaintenanceLog, Trip, Vehicle } from "@/shared/domain/models";
-import { DriverStatus, LicenseCategory, MaintenancePriority, MaintenanceStatus, MaintenanceType, TripStatus, VehicleStatus, VehicleType } from "@/shared/domain/enums";
+import type { Driver, Expense, FuelLog, MaintenanceLog, Trip, Vehicle } from "@/shared/domain/models";
+import { DriverStatus, ExpenseType, LicenseCategory, MaintenancePriority, MaintenanceStatus, MaintenanceType, TripStatus, VehicleStatus, VehicleType } from "@/shared/domain/enums";
 
 function timestamp() {
   return new Date().toISOString();
@@ -85,6 +85,61 @@ export function MockMaintenance(overrides: Partial<MaintenanceLog> = {}): Mainte
     estimatedCost: 4500,
     expectedCompletionAt: now,
     openedAt: now,
+    createdAt: now,
+    updatedAt: now,
+    ...overrides
+  };
+}
+
+export function MockFuelLog(overrides: Partial<FuelLog> = {}): FuelLog {
+  const now = timestamp();
+
+  return {
+    id: "fuel_1",
+    fuelLogNumber: "FUEL-0001",
+    vehicleId: "vehicle_001",
+    tripId: "trip_003",
+    fuelQuantity: 85,
+    fuelCost: 7650,
+    odometerReading: 15200,
+    fuelStation: "HP Petrol Pump, Pune",
+    notes: "Post-trip refuel",
+    loggedAt: now,
+    placeholders: {
+      invoiceUpload: "Invoice upload placeholder",
+      receiptOcr: "Receipt OCR placeholder",
+      fuelCard: "Fuel card placeholder",
+      vendor: "Vendor placeholder",
+      tax: "Tax placeholder",
+      gst: "GST placeholder"
+    },
+    createdAt: now,
+    updatedAt: now,
+    ...overrides
+  };
+}
+
+export function MockExpense(overrides: Partial<Expense> = {}): Expense {
+  const now = timestamp();
+
+  return {
+    id: "expense_1",
+    expenseNumber: "EXP-0001",
+    type: ExpenseType.Toll,
+    amount: 450,
+    description: "Highway toll",
+    tripId: "trip_003",
+    vehicleId: "vehicle_001",
+    incurredAt: now,
+    placeholders: {
+      receipt: "Receipt placeholder",
+      invoiceUpload: "Invoice upload placeholder",
+      receiptOcr: "Receipt OCR placeholder",
+      fuelCard: "Fuel card placeholder",
+      vendor: "Vendor placeholder",
+      tax: "Tax placeholder",
+      gst: "GST placeholder"
+    },
     createdAt: now,
     updatedAt: now,
     ...overrides

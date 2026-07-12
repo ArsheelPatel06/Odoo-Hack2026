@@ -6,8 +6,20 @@ export function calculateFuelEfficiency(distance: number, fuelQuantity: number) 
   return distance / fuelQuantity;
 }
 
-export function calculateOperationalCost(fuelCost: number, maintenanceCost: number) {
-  return fuelCost + maintenanceCost;
+export function calculateOperationalCost(fuelCost: number, maintenanceCost: number, expenseCost = 0) {
+  return fuelCost + maintenanceCost + expenseCost;
+}
+
+export function calculateTripProfit(input: { revenue: number; fuelCost: number; otherExpenses: number }) {
+  return input.revenue - input.fuelCost - input.otherExpenses;
+}
+
+export function calculateTripMargin(profit: number, revenue: number) {
+  if (revenue <= 0) {
+    return 0;
+  }
+
+  return profit / revenue;
 }
 
 export function calculateVehicleROI(input: {

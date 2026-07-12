@@ -80,8 +80,9 @@ export interface IFuelService {
 
 export interface IExpenseService {
   validate(input: {
-    expense: Pick<Expense, "amount" | "type" | "vehicleId">;
+    expense: Pick<Expense, "amount" | "type" | "vehicleId" | "tripId">;
     vehicle?: Vehicle | null;
+    trip?: Trip | null;
   }): ValidationResult;
 }
 

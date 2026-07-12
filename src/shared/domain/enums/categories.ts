@@ -36,7 +36,10 @@ export enum ExpenseType {
   Fuel = "Fuel",
   Maintenance = "Maintenance",
   Toll = "Toll",
-  Misc = "Misc"
+  Parking = "Parking",
+  Insurance = "Insurance",
+  Permit = "Permit",
+  Miscellaneous = "Miscellaneous"
 }
 
 export enum UserRole {

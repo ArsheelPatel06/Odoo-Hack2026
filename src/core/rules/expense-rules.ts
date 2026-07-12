@@ -1,4 +1,4 @@
-import type { Expense, Vehicle } from "@/shared/domain/models";
+import type { Expense, Trip, Vehicle } from "@/shared/domain/models";
 import { ExpenseType } from "@/shared/domain/enums";
 import { ExpenseValidationError } from "@/core/errors";
 
@@ -22,11 +22,19 @@ export function assertExpenseVehicleExists(vehicle: Vehicle | null | undefined, 
   }
 }
 
+export function assertExpenseTripExists(trip: Trip | null | undefined, tripId?: string) {
+  if (tripId && (!trip || trip.id !== tripId)) {
+    throw new ExpenseValidationError("Referenced trip does not exist.");
+  }
+}
+
 export function assertExpenseRules(input: {
-  expense: Pick<Expense, "amount" | "type" | "vehicleId">;
+  expense: Pick<Expense, "amount" | "type" | "vehicleId" | "tripId">;
   vehicle?: Vehicle | null;
+  trip?: Trip | null;
 }) {
   assertPositiveExpenseAmount(input.expense.amount);
   assertExpenseTypeExists(input.expense.type);
   assertExpenseVehicleExists(input.vehicle ?? null, input.expense.vehicleId);
+  assertExpenseTripExists(input.trip ?? null, input.expense.tripId);
 }

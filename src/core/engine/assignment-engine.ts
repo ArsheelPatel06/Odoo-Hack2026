@@ -1,6 +1,8 @@
-import type { Driver, MaintenanceLog, Trip, Vehicle } from "@/shared/domain/models";
+import type { Driver, Expense, FuelLog, MaintenanceLog, Trip, Vehicle } from "@/shared/domain/models";
 import { TripStatus } from "@/shared/domain/enums";
 import { DriverValidator } from "@/core/validators/driver-validator";
+import { ExpenseValidator } from "@/core/validators/expense-validator";
+import { FuelValidator } from "@/core/validators/fuel-validator";
 import { MaintenanceValidator } from "@/core/validators/maintenance-validator";
 import { TripValidator } from "@/core/validators/trip-validator";
 import { VehicleValidator } from "@/core/validators/vehicle-validator";
@@ -39,6 +41,22 @@ export function canStartMaintenance(input: { vehicle: Vehicle; maintenanceLogs: 
 
 export function canCloseMaintenance(maintenance: MaintenanceLog): ValidationResult {
   return MaintenanceValidator.validateClose(maintenance);
+}
+
+export function canLogFuel(input: {
+  fuelLog: Pick<FuelLog, "fuelQuantity" | "fuelCost" | "vehicleId" | "tripId">;
+  vehicle: Vehicle;
+  trip: Trip;
+}): ValidationResult {
+  return FuelValidator.validate(input);
+}
+
+export function canCreateExpense(input: {
+  expense: Pick<Expense, "amount" | "type" | "vehicleId" | "tripId">;
+  vehicle?: Vehicle | null;
+  trip?: Trip | null;
+}): ValidationResult {
+  return ExpenseValidator.validate(input);
 }
 
 export function isTripReadyForDispatch(trip: Trip) {

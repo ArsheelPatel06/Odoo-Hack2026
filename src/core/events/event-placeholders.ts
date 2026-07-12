@@ -279,6 +279,35 @@ export const VehicleReturnedToFleet = {
   }
 };
 
+export type OperationalCostUpdatedEvent = {
+  type: "OperationalCostUpdated";
+  vehicleId: string;
+  tripId?: string;
+  totalCost: number;
+  timestamp: string;
+};
+
+export const OperationalCostUpdated = {
+  type: "OperationalCostUpdated" as const,
+  create(input: Omit<OperationalCostUpdatedEvent, "type">): OperationalCostUpdatedEvent {
+    return { type: "OperationalCostUpdated", ...input };
+  }
+};
+
+export type ROIUpdatedEvent = {
+  type: "ROIUpdated";
+  vehicleId: string;
+  roi: number;
+  timestamp: string;
+};
+
+export const ROIUpdated = {
+  type: "ROIUpdated" as const,
+  create(input: Omit<ROIUpdatedEvent, "type">): ROIUpdatedEvent {
+    return { type: "ROIUpdated", ...input };
+  }
+};
+
 export type DomainEvent =
   | TripDispatchedEvent
   | TripCompletedEvent
@@ -293,6 +322,8 @@ export type DomainEvent =
   | VehicleReturnedToFleetEvent
   | FuelLoggedEvent
   | ExpenseCreatedEvent
+  | OperationalCostUpdatedEvent
+  | ROIUpdatedEvent
   | VehicleRegisteredEvent
   | VehicleRetiredEvent
   | VehicleArchivedEvent

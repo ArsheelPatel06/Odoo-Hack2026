@@ -8,6 +8,7 @@ import { buildDriverComplianceIndicators } from "@/modules/drivers/services/driv
 import { TRIP_STATUS_COLORS, VEHICLE_STATUS_COLORS } from "@/shared/domain/constants";
 import { TripStatus } from "@/shared/domain/enums";
 import { Badge, Button, Card, Input, PageHeader, StatusBadge } from "@/shared/components/ui";
+import { TripCostSummaryCard } from "@/modules/financial/components";
 
 const toneMap = { success: "success", primary: "primary", warning: "warning", danger: "danger", muted: "muted" } as const;
 
@@ -170,8 +171,13 @@ export function TripDetailView({ tripId }: TripDetailViewProps) {
       </Card>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <PlaceholderPanel title="Fuel" description="Fuel logs will connect in Commit 9." />
-        <PlaceholderPanel title="Expenses" description="Expense records will connect in Commit 9." />
+        {detail.trip.status === TripStatus.Completed ? <TripCostSummaryCard tripId={detail.trip.id} /> : null}
+        <Card>
+          <h3 className="text-sm font-semibold">Financial Timeline</h3>
+          <p className="mt-2 text-sm text-muted">
+            Trip completion, fuel logs, expenses, and cost updates appear in the financial timeline.
+          </p>
+        </Card>
       </div>
     </div>
   );
@@ -183,14 +189,5 @@ function InfoRow({ label, value }: { label: string; value: string }) {
       <dt className="text-muted">{label}</dt>
       <dd>{value}</dd>
     </div>
-  );
-}
-
-function PlaceholderPanel({ title, description }: { title: string; description: string }) {
-  return (
-    <Card>
-      <h3 className="text-sm font-semibold">{title}</h3>
-      <p className="mt-2 text-sm text-muted">{description}</p>
-    </Card>
   );
 }

@@ -189,23 +189,72 @@ export const CompleteMaintenanceSchema = z.object({
 
 export const FuelLogSchema = z.object({
   id: EntityIdSchema,
+  fuelLogNumber: z.string().min(1),
   vehicleId: EntityIdSchema,
-  tripId: EntityIdSchema.optional(),
-  fuelQuantity: z.number().nonnegative(),
-  fuelCost: MoneySchema,
+  tripId: EntityIdSchema,
+  fuelQuantity: z.number().positive(),
+  fuelCost: z.number().positive(),
   odometerReading: z.number().nonnegative(),
-  loggedAt: DateTimeSchema
+  fuelStation: z.string().min(1),
+  notes: z.string().optional(),
+  loggedAt: DateTimeSchema,
+  placeholders: z
+    .object({
+      invoiceUpload: z.string().optional(),
+      receiptOcr: z.string().optional(),
+      fuelCard: z.string().optional(),
+      vendor: z.string().optional(),
+      tax: z.string().optional(),
+      gst: z.string().optional()
+    })
+    .optional(),
+  createdAt: DateTimeSchema,
+  updatedAt: DateTimeSchema
+});
+
+export const CreateFuelLogSchema = z.object({
+  tripId: EntityIdSchema,
+  vehicleId: EntityIdSchema,
+  fuelQuantity: z.number().positive(),
+  fuelCost: z.number().positive(),
+  odometerReading: z.number().nonnegative(),
+  fuelStation: z.string().min(1),
+  notes: z.string().optional(),
+  loggedAt: DateTimeSchema.optional()
 });
 
 export const ExpenseSchema = z.object({
   id: EntityIdSchema,
+  expenseNumber: z.string().min(1),
   type: z.nativeEnum(ExpenseType),
-  amount: MoneySchema,
+  amount: z.number().positive(),
   description: z.string().optional(),
   tripId: EntityIdSchema.optional(),
   vehicleId: EntityIdSchema.optional(),
   driverId: EntityIdSchema.optional(),
-  incurredAt: DateTimeSchema
+  incurredAt: DateTimeSchema,
+  placeholders: z
+    .object({
+      receipt: z.string().optional(),
+      invoiceUpload: z.string().optional(),
+      receiptOcr: z.string().optional(),
+      fuelCard: z.string().optional(),
+      vendor: z.string().optional(),
+      tax: z.string().optional(),
+      gst: z.string().optional()
+    })
+    .optional(),
+  createdAt: DateTimeSchema,
+  updatedAt: DateTimeSchema
+});
+
+export const CreateExpenseSchema = z.object({
+  type: z.nativeEnum(ExpenseType),
+  amount: z.number().positive(),
+  description: z.string().optional(),
+  tripId: EntityIdSchema.optional(),
+  vehicleId: EntityIdSchema.optional(),
+  incurredAt: DateTimeSchema.optional()
 });
 
 export const RoleSchema = z.object({

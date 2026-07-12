@@ -24,5 +24,20 @@ export const seedTrips: Trip[] = [
     plannedDistance: 280,
     vehicleId: "vehicle_002",
     driverId: "driver_002"
+  }),
+  MockTrip({
+    id: "trip_003",
+    tripNumber: "TRP-0003",
+    status: TripStatus.Completed,
+    origin: "Pune Depot",
+    destination: "Nashik Hub",
+    cargoWeight: 800,
+    plannedDistance: 210,
+    vehicleId: "vehicle_001",
+    driverId: "driver_001",
+    finalOdometer: 15200,
+    fuelConsumed: 85,
+    revenue: 18500,
+    completionNotes: "Delivered on schedule"
   })
 ];

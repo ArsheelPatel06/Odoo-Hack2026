@@ -1,11 +1,14 @@
-import { ModuleShell } from "@/shared/components/layout/ModuleShell";
+import { ExpenseRegistry } from "@/modules/financial/components";
+import { PageHeader } from "@/shared/components/ui";
 
 export default function ExpensesPage() {
   return (
-    <ModuleShell
-      title="Expenses"
-      description="Expense shell for operational spend tracking and approvals."
-      emptyTitle="Expenses module shell ready"
-    />
+    <div className="grid gap-8">
+      <PageHeader
+        title="Expense Management"
+        description="Operational spend records aggregated into vehicle and trip cost summaries."
+      />
+      <ExpenseRegistry />
+    </div>
   );
 }

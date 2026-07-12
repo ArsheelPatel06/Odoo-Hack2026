@@ -7,6 +7,7 @@ import { fleetVehicleService } from "@/modules/fleet";
 import { VEHICLE_STATUS_COLORS } from "@/shared/domain/constants";
 import { VehicleType } from "@/shared/domain/enums";
 import { Button, Card, Input, PageHeader, Select, StatusBadge } from "@/shared/components/ui";
+import { VehicleCostSummaryCard } from "@/modules/financial/components";
 
 const statusToneMap = {
   success: "success",
@@ -171,11 +172,11 @@ export function VehicleDetailView({ vehicleId }: VehicleDetailViewProps) {
         </ol>
       </Card>
 
+      <VehicleCostSummaryCard vehicleId={vehicleId} />
+
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <PlaceholderPanel title="Trip History" description="Trip records will connect in Commit 7." />
         <PlaceholderPanel title="Maintenance History" description="Maintenance records will connect in Commit 8." />
-        <PlaceholderPanel title="Fuel Logs" description="Fuel records will connect in Commit 9." />
-        <PlaceholderPanel title="Expense History" description="Expense records will connect in Commit 9." />
         <PlaceholderPanel title="Documents" description="Document management placeholder for future integration." />
       </div>
     </div>
