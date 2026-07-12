@@ -10,12 +10,23 @@ type CommandPaletteProps = {
   onOpenChange: (open: boolean) => void;
   items: Array<{ id: string; label: string; hint?: string; onSelect: () => void }>;
   className?: string;
+  enableShortcut?: boolean;
 };
 
-export function CommandPalette({ open, onOpenChange, items, className }: CommandPaletteProps) {
+export function CommandPalette({
+  open,
+  onOpenChange,
+  items,
+  className,
+  enableShortcut = true
+}: CommandPaletteProps) {
   const [query, setQuery] = useState("");
 
   useEffect(() => {
+    if (!enableShortcut) {
+      return;
+    }
+
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
@@ -29,7 +40,7 @@ export function CommandPalette({ open, onOpenChange, items, className }: Command
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [onOpenChange, open]);
+  }, [enableShortcut, onOpenChange, open]);
 
   if (!open) return null;
 

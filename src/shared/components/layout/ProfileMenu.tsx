@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, LogOut, UserRound } from "lucide-react";
-import { Button } from "@/shared/components/ui";
+import { ChevronDown, LogOut, Settings } from "lucide-react";
+import { Avatar, Button } from "@/shared/components/ui";
+import { APP_ROUTES } from "@/shared/domain/routes";
 import { useSession } from "@/shared/providers/SessionProvider";
 import { cn } from "@/shared/lib";
 
@@ -35,30 +37,38 @@ export function ProfileMenu({ onLogout }: ProfileMenuProps) {
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
-        className="flex items-center gap-3 rounded-md border border-border bg-surface px-3 py-2 text-left transition hover:bg-slate-700/60"
+        className="flex items-center gap-2 rounded-button border border-subtle bg-surface px-2 py-1.5 text-left transition duration-base hover:bg-muted-surface"
         aria-expanded={open}
         aria-haspopup="menu"
       >
-        <UserRound className="size-4 text-muted" />
-        <div className="hidden max-w-40 truncate sm:block">
-          <div className="truncate text-xs font-medium text-text">{user.name}</div>
-          <div className="truncate text-[11px] text-muted">{user.role}</div>
+        <Avatar name={user.name} size="sm" />
+        <div className="hidden max-w-36 truncate sm:block">
+          <div className="truncate text-body-sm font-medium text-primary">{user.name}</div>
+          <div className="truncate text-caption text-muted">{user.role}</div>
         </div>
-        <ChevronDown className={cn("size-4 text-muted transition", open && "rotate-180")} />
+        <ChevronDown className={cn("size-4 text-muted transition duration-base", open && "rotate-180")} />
       </button>
 
       {open ? (
         <div
           role="menu"
-          className="absolute right-0 top-[calc(100%+8px)] z-40 w-56 rounded-card border border-border bg-surface p-2 shadow-panel"
+          className="absolute right-0 top-[calc(100%+8px)] z-40 w-56 overflow-hidden rounded-card border border-subtle bg-popover p-1 shadow-panel animate-scale-in"
         >
-          <div className="border-b border-border px-3 py-2">
-            <div className="text-sm font-medium text-text">{user.name}</div>
-            <div className="text-xs text-muted">{user.email}</div>
+          <div className="border-b border-subtle px-3 py-2">
+            <div className="text-body-md font-medium text-primary">{user.name}</div>
+            <div className="text-caption text-muted">{user.email}</div>
           </div>
+
+          <Button asChild variant="ghost" className="mt-1 w-full justify-start">
+            <Link href={APP_ROUTES.settings} onClick={() => setOpen(false)}>
+              <Settings className="size-4" />
+              Settings
+            </Link>
+          </Button>
+
           <Button
             variant="ghost"
-            className="mt-1 w-full justify-start"
+            className="w-full justify-start"
             onClick={() => {
               setOpen(false);
               onLogout();

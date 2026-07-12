@@ -1,48 +1,47 @@
 "use client";
 
 import { X } from "lucide-react";
-import { Button } from "@/shared/components/ui";
+import { SidebarBrand } from "@/shared/components/layout/SidebarBrand";
 import { SidebarNav } from "@/shared/components/layout/SidebarNav";
+import { Button } from "@/shared/components/ui";
+import { useShellStore } from "@/shared/store/shell-store";
 import { cn } from "@/shared/lib";
 
 type MobileNavProps = {
-  open: boolean;
   pathname: string;
   navigation: Parameters<typeof SidebarNav>[0]["items"];
-  onClose: () => void;
 };
 
-export function MobileNav({ open, pathname, navigation, onClose }: MobileNavProps) {
+export function MobileNav({ pathname, navigation }: MobileNavProps) {
+  const { mobileNavOpen, setMobileNavOpen } = useShellStore();
+
   return (
     <>
       <div
         className={cn(
-          "fixed inset-0 z-40 bg-background/70 backdrop-blur-sm transition md:hidden",
-          open ? "opacity-100" : "pointer-events-none opacity-0"
+          "fixed inset-0 z-40 bg-overlay backdrop-blur-[1px] transition-opacity duration-base md:hidden",
+          mobileNavOpen ? "opacity-100" : "pointer-events-none opacity-0"
         )}
-        onClick={onClose}
-        aria-hidden={!open}
+        onClick={() => setMobileNavOpen(false)}
+        aria-hidden={!mobileNavOpen}
       />
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-72 border-r border-border bg-surface p-5 shadow-panel transition duration-200 md:hidden",
-          open ? "translate-x-0" : "-translate-x-full"
+          "fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-subtle bg-sidebar p-5 shadow-panel transition-transform duration-slow ease-out md:hidden",
+          mobileNavOpen ? "translate-x-0" : "-translate-x-full"
         )}
-        aria-hidden={!open}
+        aria-hidden={!mobileNavOpen}
+        aria-label="Mobile navigation"
       >
         <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="grid size-10 place-items-center rounded-card bg-primary text-sm font-bold text-white">TO</div>
-            <div>
-              <div className="text-base font-semibold">TransitOps</div>
-              <div className="text-xs text-muted">Operations Console</div>
-            </div>
-          </div>
-          <Button variant="ghost" className="size-10 p-0" onClick={onClose} aria-label="Close navigation">
+          <SidebarBrand />
+          <Button variant="ghost" size="icon" onClick={() => setMobileNavOpen(false)} aria-label="Close navigation">
             <X className="size-5" />
           </Button>
         </div>
-        <SidebarNav items={navigation} pathname={pathname} onNavigate={onClose} />
+        <div className="flex-1 overflow-y-auto">
+          <SidebarNav items={navigation} pathname={pathname} onNavigate={() => setMobileNavOpen(false)} />
+        </div>
       </aside>
     </>
   );

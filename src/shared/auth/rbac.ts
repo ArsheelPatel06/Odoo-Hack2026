@@ -12,20 +12,44 @@ export function hasPermission(permissions: string[], permission: string) {
   return permissions.includes(permission);
 }
 
+export function matchesAppRoute(pathname: string, baseRoute: string) {
+  return pathname === baseRoute || pathname.startsWith(`${baseRoute}/`);
+}
+
 export function canAccessModule(role: UserRole, module: string) {
   return (getRoleAccess(role).allowedModules as readonly string[]).includes(module);
 }
 
-export function canAccessRoute(role: UserRole, route: string) {
-  return (getRoleAccess(role).allowedRoutes as readonly string[]).includes(route);
+export function canAccessRoute(role: UserRole, pathname: string) {
+  return getRoleAccess(role).allowedRoutes.some((route) => matchesAppRoute(pathname, route));
 }
 
 export function getAllowedNavigation(permissions: string[]) {
-  return SIDEBAR_NAVIGATION.filter((item) => hasPermission(permissions, item.permission));
+  const filtered = SIDEBAR_NAVIGATION.filter((item) => hasPermission(permissions, item.permission));
+  const byRoute = new Map<string, (typeof SIDEBAR_NAVIGATION)[number]>();
+
+  for (const item of filtered) {
+    const existing = byRoute.get(item.route);
+
+    if (!existing || item.permission.endsWith(".view")) {
+      byRoute.set(item.route, item);
+    }
+  }
+
+  return Array.from(byRoute.values());
+}
+
+export function getActiveNavigationItem(pathname: string, items: ReturnType<typeof getAllowedNavigation>) {
+  return items
+    .filter((item) => matchesAppRoute(pathname, item.route))
+    .sort((left, right) => right.route.length - left.route.length)[0];
 }
 
 export function getRoutePermission(pathname: string) {
-  const match = SIDEBAR_NAVIGATION.find((item) => item.route === pathname);
+  const match = SIDEBAR_NAVIGATION.filter((item) => matchesAppRoute(pathname, item.route)).sort(
+    (left, right) => right.route.length - left.route.length
+  )[0];
+
   return match?.permission ?? null;
 }
 
