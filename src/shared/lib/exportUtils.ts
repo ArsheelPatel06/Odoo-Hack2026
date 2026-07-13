@@ -26,7 +26,7 @@ export function exportToPDF(filename: string, title: string, headers: string[], 
   doc.setFontSize(10);
   doc.text(`Generated on ${new Date().toLocaleString()}`, 14, 22);
 
-  // @ts-ignore
+  // @ts-expect-error
   doc.autoTable({
     startY: 28,
     head: [headers],

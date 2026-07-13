@@ -45,8 +45,10 @@ export function MapplsMap({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let map: any = null;
 
+    const currentContainer = mapContainerRef.current;
+    
     const initMap = async () => {
-      if (!mapContainerRef.current) return;
+      if (!currentContainer) return;
       
       try {
         const { mappls } = await import("mappls-web-maps");
@@ -60,8 +62,8 @@ export function MapplsMap({
         const timeoutId = setTimeout(() => {
           if (!isLoaded) {
             console.error("Mappls SDK initialization timed out. The API key might be invalid or unauthorized.");
-            if (mapContainerRef.current) {
-              mapContainerRef.current.innerHTML = `
+            if (currentContainer) {
+              currentContainer.innerHTML = `
                 <div class="flex h-full w-full flex-col items-center justify-center bg-red-50 text-center p-4">
                   <p class="text-red-600 font-medium text-sm">Failed to load MapmyIndia SDK.</p>
                   <p class="text-red-500 text-xs mt-1">Please check your API key and domain whitelist in the Mappls console.</p>
@@ -97,12 +99,12 @@ export function MapplsMap({
 
     return () => {
       if (map) {
-        if (mapContainerRef.current) {
-          mapContainerRef.current.innerHTML = "";
+        if (currentContainer) {
+          currentContainer.innerHTML = "";
         }
       }
     };
-  }, [apiKey, defaultCenter.lat, defaultCenter.lng, defaultZoom, mapContainerId]);
+  }, [apiKey, defaultCenter.lat, defaultCenter.lng, defaultZoom, mapContainerId, isLoaded]);
 
   return (
     <MapplsMapContext.Provider value={{ mapInstance, mapplsClass, isLoaded }}>

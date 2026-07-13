@@ -59,8 +59,8 @@ export function EmailSenderModal({
       }
 
       onClose();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to send email");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to send email");
     } finally {
       setIsSending(false);
     }
@@ -89,7 +89,7 @@ export function EmailSenderModal({
               placeholder="e.g. your.name@gmail.com"
               className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
             />
-            <p className="text-xs text-slate-500 mt-1">We'll deliver a beautiful HTML email to this address.</p>
+            <p className="text-xs text-slate-500 mt-1">We&apos;ll deliver a beautiful HTML email to this address.</p>
           </div>
 
           <div className="bg-slate-50 p-4 rounded-lg border border-slate-100 text-sm">

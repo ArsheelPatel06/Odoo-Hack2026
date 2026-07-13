@@ -31,10 +31,12 @@ export function AutocompleteShell({
         role="combobox"
         aria-expanded={Boolean(children)}
         aria-autocomplete="list"
+        aria-controls="autocomplete-listbox"
         {...inputProps}
       />
       {children ? (
         <div
+          id="autocomplete-listbox"
           className="absolute z-20 mt-2 w-full overflow-hidden rounded-card border border-subtle bg-popover shadow-elevated animate-slide-up"
           role="listbox"
         >

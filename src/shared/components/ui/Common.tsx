@@ -44,6 +44,7 @@ export function Avatar({ name, src, size = "md", className }: AvatarProps) {
     .toUpperCase();
 
   if (src) {
+    /* eslint-disable-next-line @next/next/no-img-element */
     return <img src={src} alt={name} className={cn("rounded-full object-cover", avatarSizes[size], className)} />;
   }
 
