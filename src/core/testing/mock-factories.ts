@@ -41,9 +41,10 @@ export function MockDriver(overrides: Partial<Driver> = {}): Driver {
     safetyScore: 92,
     status: DriverStatus.Available,
     isArchived: false,
-    documentCount: 0,
-    createdAt: now,
-    updatedAt: now,
+    documentCount: 2,
+    kycStatus: "PENDING",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     ...overrides
   };
 }

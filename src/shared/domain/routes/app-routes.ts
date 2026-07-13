@@ -8,7 +8,8 @@ export const APP_ROUTES = {
   expenses: "/expenses",
   analytics: "/analytics",
   compliance: "/compliance",
-  settings: "/settings"
+  settings: "/settings",
+  docs: "/docs"
 } as const;
 
 export type AppRouteKey = keyof typeof APP_ROUTES;

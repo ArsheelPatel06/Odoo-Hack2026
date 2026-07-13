@@ -1,4 +1,5 @@
 import type { Trip } from "@/shared/domain/models";
+import { TripStatus } from "@/shared/domain/enums";
 import type { TripListQuery } from "@/modules/trips/schemas";
 import type { ITripRepository } from "@/modules/trips/repositories/interfaces";
 
@@ -24,6 +25,14 @@ export class InMemoryTripRepository implements ITripRepository {
   create(trip: Trip) {
     this.trips.push(trip);
     return trip;
+  }
+
+  updateStatus(id: string, status: TripStatus): void {
+    const trip = this.findById(id);
+    if (trip) {
+      trip.status = status;
+      trip.updatedAt = new Date().toISOString();
+    }
   }
 
   update(id: string, patch: Partial<Trip>) {

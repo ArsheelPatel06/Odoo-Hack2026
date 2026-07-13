@@ -15,6 +15,7 @@ export enum DriverStatus {
 export enum TripStatus {
   Draft = "Draft",
   Dispatched = "Dispatched",
+  InTransit = "InTransit",
   Completed = "Completed",
   Cancelled = "Cancelled"
 }

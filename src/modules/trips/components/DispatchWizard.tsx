@@ -1,15 +1,20 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { tripManagementService } from "@/modules/trips";
-import { buildDriverComplianceIndicators } from "@/modules/drivers/services/driver-compliance";
-import { DRIVER_STATUS_COLORS, VEHICLE_STATUS_COLORS } from "@/shared/domain/constants";
-import type { Driver, Vehicle } from "@/shared/domain/models";
-import { Badge, Button, Card, Input, PageHeader, StatusBadge } from "@/shared/components/ui";
-
-const toneMap = { success: "success", primary: "primary", warning: "warning", danger: "danger", muted: "muted" } as const;
+import {
+  DispatchConfirmStep,
+  DispatchDriverStep,
+  DispatchRoutePreview,
+  DispatchRouteStep,
+  DispatchStepper,
+  DispatchValidationPanel,
+  DispatchVehicleStep
+} from "@/modules/trips/components/dispatch";
+import { Button, PageHeader } from "@/shared/components/ui";
 
 export function DispatchWizard() {
   const router = useRouter();
@@ -21,46 +26,38 @@ export function DispatchWizard() {
   const [plannedDistance, setPlannedDistance] = useState("100");
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
   const [selectedDriverId, setSelectedDriverId] = useState<string | null>(null);
+  const [vehicleSearch, setVehicleSearch] = useState("");
+  const [driverSearch, setDriverSearch] = useState("");
+  const [dispatching, setDispatching] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const vehicles = useMemo(() => {
-    void refreshKey;
-    return tripManagementService.getDispatchableVehicles();
-  }, [refreshKey]);
+  void refreshKey;
+  const vehicles = tripManagementService.getDispatchableVehicles();
+  const drivers = tripManagementService.getDispatchableDrivers();
+  const trip = tripId ? tripManagementService.getTripById(tripId) : null;
+  const validation = tripId ? tripManagementService.getDispatchValidation(tripId) : null;
 
-  const drivers = useMemo(() => {
-    void refreshKey;
-    return tripManagementService.getDispatchableDrivers();
-  }, [refreshKey]);
-
-  const validation = useMemo(() => {
-    if (!tripId) {
-      return null;
-    }
-
-    return tripManagementService.getDispatchValidation(tripId);
-  }, [tripId, refreshKey, selectedDriverId, selectedVehicleId]);
+  const selectedVehicle = vehicles.find((vehicle) => vehicle.id === selectedVehicleId);
+  const selectedDriver = drivers.find((driver) => driver.id === selectedDriverId);
 
   const handleCreateTrip = () => {
     try {
-      const trip = tripManagementService.createTripDraft({
+      const created = tripManagementService.createTripDraft({
         origin,
         destination,
         cargoWeight: Number(cargoWeight),
         plannedDistance: Number(plannedDistance)
       });
-      setTripId(trip.id);
+      setTripId(created.id);
       setStep(2);
-      toast.success("Trip draft created.");
+      toast.success("Trip lane created. Select a vehicle.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to create trip.");
     }
   };
 
   const handleSelectVehicle = (vehicleId: string) => {
-    if (!tripId) {
-      return;
-    }
+    if (!tripId) return;
 
     try {
       tripManagementService.assignVehicle(tripId, vehicleId);
@@ -73,9 +70,7 @@ export function DispatchWizard() {
   };
 
   const handleSelectDriver = (driverId: string) => {
-    if (!tripId) {
-      return;
-    }
+    if (!tripId) return;
 
     try {
       tripManagementService.assignDriver(tripId, driverId);
@@ -87,165 +82,103 @@ export function DispatchWizard() {
     }
   };
 
-  const handleDispatch = () => {
-    if (!tripId) {
-      return;
-    }
+  const handleDispatch = async () => {
+    if (!tripId) return;
 
+    setDispatching(true);
     try {
       tripManagementService.dispatchTrip(tripId);
-      toast.success("Trip dispatched.");
+      toast.success("Trip dispatched. Vehicle and driver are now On Trip.");
       router.push(`/trips/${tripId}`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Dispatch failed.");
       setRefreshKey((value) => value + 1);
+    } finally {
+      setDispatching(false);
     }
   };
 
   return (
     <div className="grid gap-6">
-      <PageHeader
-        title="Dispatch Wizard"
-        description="Plan, validate, and dispatch trips through the workflow engine."
-      />
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <PageHeader
+          title="Dispatch Control"
+          description="Plan, validate, and release trips through the workflow engine — no manual status edits."
+        />
+        <Button asChild variant="outline">
+          <Link href="/trips">Trip registry</Link>
+        </Button>
+      </div>
 
-      <Card>
-        <div className="flex flex-wrap gap-2 text-sm">
-          {["Trip Information", "Vehicle Selection", "Driver Selection", "Validation Summary"].map((label, index) => (
-            <Badge key={label} tone={step === index + 1 ? "primary" : "muted"}>
-              Step {index + 1}: {label}
-            </Badge>
-          ))}
-        </div>
-      </Card>
+      <DispatchStepper currentStep={step} />
 
-      {step === 1 ? (
-        <Card className="grid max-w-2xl gap-4">
-          <Input value={origin} onChange={(e) => setOrigin(e.target.value)} placeholder="Source" />
-          <Input value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="Destination" />
-          <Input value={cargoWeight} onChange={(e) => setCargoWeight(e.target.value)} placeholder="Cargo weight (kg)" />
-          <Input value={plannedDistance} onChange={(e) => setPlannedDistance(e.target.value)} placeholder="Planned distance (km)" />
-          <Button onClick={handleCreateTrip}>Continue to vehicle selection</Button>
-        </Card>
+      {tripId ? (
+        <DispatchRoutePreview
+          origin={origin}
+          destination={destination}
+          cargoWeight={cargoWeight}
+          plannedDistance={plannedDistance}
+        />
       ) : null}
 
-      {step === 2 ? (
-        <div className="grid gap-4 md:grid-cols-2">
-          {vehicles.map((vehicle) => (
-            <VehicleCard
-              key={vehicle.id}
-              vehicle={vehicle}
-              selected={selectedVehicleId === vehicle.id}
-              onSelect={() => handleSelectVehicle(vehicle.id)}
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
+        <div>
+          {step === 1 ? (
+            <DispatchRouteStep
+              origin={origin}
+              destination={destination}
+              cargoWeight={cargoWeight}
+              plannedDistance={plannedDistance}
+              onOriginChange={setOrigin}
+              onDestinationChange={setDestination}
+              onCargoWeightChange={setCargoWeight}
+              onPlannedDistanceChange={setPlannedDistance}
+              onContinue={handleCreateTrip}
             />
-          ))}
-          <div className="md:col-span-2 flex gap-2">
-            <Button variant="secondary" onClick={() => setStep(1)}>
-              Back
-            </Button>
-            <Button disabled={!selectedVehicleId} onClick={() => setStep(3)}>
-              Continue to driver selection
-            </Button>
-          </div>
-        </div>
-      ) : null}
+          ) : null}
 
-      {step === 3 ? (
-        <div className="grid gap-4 md:grid-cols-2">
-          {drivers.map((driver) => (
-            <DriverCard
-              key={driver.id}
-              driver={driver}
-              selected={selectedDriverId === driver.id}
-              onSelect={() => handleSelectDriver(driver.id)}
+          {step === 2 ? (
+            <DispatchVehicleStep
+              vehicles={vehicles}
+              cargoWeight={Number(cargoWeight)}
+              search={vehicleSearch}
+              selectedVehicleId={selectedVehicleId}
+              onSearchChange={setVehicleSearch}
+              onSelectVehicle={handleSelectVehicle}
+              onBack={() => setStep(1)}
+              onContinue={() => setStep(3)}
             />
-          ))}
-          <div className="md:col-span-2 flex gap-2">
-            <Button variant="secondary" onClick={() => setStep(2)}>
-              Back
-            </Button>
-            <Button disabled={!selectedDriverId} onClick={() => setStep(4)}>
-              Continue to validation
-            </Button>
-          </div>
-        </div>
-      ) : null}
+          ) : null}
 
-      {step === 4 && validation ? (
-        <Card className="grid gap-4">
-          {validation.checks.map((check) => (
-            <div key={check.key} className="flex items-start gap-3 rounded-md border border-border px-4 py-3">
-              <span className={check.passed ? "text-success" : "text-danger"}>{check.passed ? "✓" : "✗"}</span>
-              <div>
-                <div className="font-medium">{check.label}</div>
-                <div className="text-sm text-muted">{check.message}</div>
-              </div>
-            </div>
-          ))}
-          <div className="flex gap-2">
-            <Button variant="secondary" onClick={() => setStep(3)}>
-              Back
-            </Button>
-            <Button disabled={!validation.readyToDispatch} onClick={handleDispatch}>
-              Dispatch Trip
-            </Button>
-          </div>
-        </Card>
-      ) : null}
+          {step === 3 ? (
+            <DispatchDriverStep
+              drivers={drivers}
+              search={driverSearch}
+              selectedDriverId={selectedDriverId}
+              onSearchChange={setDriverSearch}
+              onSelectDriver={handleSelectDriver}
+              onBack={() => setStep(2)}
+              onContinue={() => setStep(4)}
+            />
+          ) : null}
+
+          {step === 4 && trip && validation ? (
+            <DispatchConfirmStep
+              trip={trip}
+              vehicle={selectedVehicle}
+              driver={selectedDriver}
+              validation={validation}
+              dispatching={dispatching}
+              onBack={() => setStep(3)}
+              onDispatch={handleDispatch}
+            />
+          ) : null}
+        </div>
+
+        {step < 4 ? (
+          <DispatchValidationPanel validation={validation} compact />
+        ) : null}
+      </div>
     </div>
-  );
-}
-
-function VehicleCard({ vehicle, selected, onSelect }: { vehicle: Vehicle; selected: boolean; onSelect: () => void }) {
-  const tone = toneMap[VEHICLE_STATUS_COLORS[vehicle.status] as keyof typeof toneMap] ?? "muted";
-
-  return (
-    <Card className={selected ? "ring-2 ring-primary" : undefined}>
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <div className="font-semibold">{vehicle.name}</div>
-          <div className="text-sm text-muted">{vehicle.registrationNumber}</div>
-        </div>
-        <StatusBadge label={vehicle.status} tone={tone} />
-      </div>
-      <dl className="mt-4 grid gap-2 text-sm">
-        <div className="flex justify-between"><dt className="text-muted">Type</dt><dd>{vehicle.type}</dd></div>
-        <div className="flex justify-between"><dt className="text-muted">Capacity</dt><dd>{vehicle.capacity} kg</dd></div>
-      </dl>
-      <Button className="mt-4 w-full" variant={selected ? "secondary" : "primary"} onClick={onSelect}>
-        {selected ? "Selected" : "Select vehicle"}
-      </Button>
-    </Card>
-  );
-}
-
-function DriverCard({ driver, selected, onSelect }: { driver: Driver; selected: boolean; onSelect: () => void }) {
-  const tone = toneMap[DRIVER_STATUS_COLORS[driver.status] as keyof typeof toneMap] ?? "muted";
-  const compliance = buildDriverComplianceIndicators(driver).filter((item) => item.active);
-
-  return (
-    <Card className={selected ? "ring-2 ring-primary" : undefined}>
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <div className="font-semibold">{driver.name}</div>
-          <div className="text-sm text-muted">{driver.licenseNumber}</div>
-        </div>
-        <StatusBadge label={driver.status} tone={tone} />
-      </div>
-      <dl className="mt-4 grid gap-2 text-sm">
-        <div className="flex justify-between"><dt className="text-muted">Safety</dt><dd>★ {driver.safetyScore}</dd></div>
-        <div className="flex justify-between"><dt className="text-muted">Category</dt><dd>{driver.licenseCategory}</dd></div>
-      </dl>
-      <div className="mt-3 flex flex-wrap gap-1">
-        {compliance.map((item) => (
-          <Badge key={item.key} tone={item.tone}>
-            {item.label}
-          </Badge>
-        ))}
-      </div>
-      <Button className="mt-4 w-full" variant={selected ? "secondary" : "primary"} onClick={onSelect}>
-        {selected ? "Selected" : "Select driver"}
-      </Button>
-    </Card>
   );
 }

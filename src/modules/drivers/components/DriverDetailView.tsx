@@ -7,6 +7,7 @@ import { fleetDriverService } from "@/modules/drivers";
 import { DRIVER_STATUS_COLORS } from "@/shared/domain/constants";
 import { DriverStatus, LicenseCategory } from "@/shared/domain/enums";
 import { Badge, Button, Card, Input, PageHeader, Select, StatusBadge } from "@/shared/components/ui";
+import { DigiLockerSimulator } from "@/shared/components/kyc";
 
 const statusToneMap = {
   success: "success",
@@ -21,6 +22,7 @@ type DriverDetailViewProps = {
 };
 
 export function DriverDetailView({ driverId }: DriverDetailViewProps) {
+  const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
   const [detail, setDetail] = useState(() => fleetDriverService.getDriverDetail(driverId));
   const [name, setName] = useState(detail.driver.name);
   const [email, setEmail] = useState(detail.driver.email);
@@ -111,6 +113,54 @@ export function DriverDetailView({ driverId }: DriverDetailViewProps) {
             ))}
         </div>
       </Card>
+
+      <Card>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 className="text-base font-semibold">KYC Verification</h2>
+            <p className="text-sm text-muted mt-1">Verify identity documents securely via DigiLocker.</p>
+          </div>
+          {detail.driver.kycStatus === "VERIFIED" ? (
+            <div className="flex items-center gap-2 text-green-600 font-medium bg-green-50 px-4 py-2 rounded-lg border border-green-200">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              Verified ({detail.driver.kycData?.aadhaarNumber})
+            </div>
+          ) : (
+            <Button onClick={() => setIsSimulatorOpen(true)} className="bg-[#1b2f4f] hover:bg-[#112036]">
+              Verify Identity
+            </Button>
+          )}
+        </div>
+        {detail.driver.kycStatus === "VERIFIED" && detail.driver.kycData && (
+          <div className="mt-4 grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-100 text-sm">
+            <div>
+              <span className="text-muted block mb-1">Verified Name</span>
+              <span className="font-medium">{detail.driver.kycData.verifiedName}</span>
+            </div>
+            <div>
+              <span className="text-muted block mb-1">Date of Birth</span>
+              <span className="font-medium">{detail.driver.kycData.dob}</span>
+            </div>
+            <div className="col-span-2">
+              <span className="text-muted block mb-1">Registered Address</span>
+              <span className="font-medium">{detail.driver.kycData.address}</span>
+            </div>
+          </div>
+        )}
+      </Card>
+
+      <DigiLockerSimulator 
+        isOpen={isSimulatorOpen} 
+        onClose={() => setIsSimulatorOpen(false)} 
+        onSuccess={(kycData) => {
+          fleetDriverService.updateKycStatus(driverId, "VERIFIED", kycData);
+          setIsSimulatorOpen(false);
+          toast.success("Identity verified successfully!");
+          refresh();
+        }}
+      />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>

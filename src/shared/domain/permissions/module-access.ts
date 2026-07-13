@@ -92,23 +92,24 @@ export const ROLE_ACCESS = {
       APP_ROUTES.fuel,
       APP_ROUTES.expenses,
       APP_ROUTES.analytics,
-      APP_ROUTES.settings
+      APP_ROUTES.settings,
+      APP_ROUTES.docs
     ],
     allowedModules: ["dashboard", "fleet", "drivers", "trips", "maintenance", "fuel", "expenses", "analytics", "settings"],
     permissions: ROLE_PERMISSIONS[UserRole.FleetManager]
   },
   [UserRole.Dispatcher]: {
-    allowedRoutes: [APP_ROUTES.dashboard, APP_ROUTES.trips, APP_ROUTES.fleet, APP_ROUTES.drivers],
+    allowedRoutes: [APP_ROUTES.dashboard, APP_ROUTES.trips, APP_ROUTES.fleet, APP_ROUTES.drivers, APP_ROUTES.docs],
     allowedModules: ["dashboard", "trips", "fleet", "drivers"],
     permissions: ROLE_PERMISSIONS[UserRole.Dispatcher]
   },
   [UserRole.SafetyOfficer]: {
-    allowedRoutes: [APP_ROUTES.dashboard, APP_ROUTES.drivers, APP_ROUTES.compliance],
+    allowedRoutes: [APP_ROUTES.dashboard, APP_ROUTES.drivers, APP_ROUTES.compliance, APP_ROUTES.docs],
     allowedModules: ["dashboard", "drivers", "compliance"],
     permissions: ROLE_PERMISSIONS[UserRole.SafetyOfficer]
   },
   [UserRole.FinancialAnalyst]: {
-    allowedRoutes: [APP_ROUTES.dashboard, APP_ROUTES.fuel, APP_ROUTES.expenses, APP_ROUTES.analytics],
+    allowedRoutes: [APP_ROUTES.dashboard, APP_ROUTES.fuel, APP_ROUTES.expenses, APP_ROUTES.analytics, APP_ROUTES.docs],
     allowedModules: ["dashboard", "fuel", "expenses", "analytics"],
     permissions: ROLE_PERMISSIONS[UserRole.FinancialAnalyst]
   }

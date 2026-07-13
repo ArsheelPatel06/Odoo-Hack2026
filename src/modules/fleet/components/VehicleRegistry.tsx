@@ -7,7 +7,7 @@ import { VEHICLE_STATUS_COLORS } from "@/shared/domain/constants";
 import { VehicleStatus, VehicleType } from "@/shared/domain/enums";
 import type { Vehicle } from "@/shared/domain/models";
 import { Button, FilterBar, PageHeader, SearchBar, Select, StatusBadge, TableWrapper } from "@/shared/components/ui";
-
+import { exportToCSV, exportToPDF } from "@/shared/lib/exportUtils";
 const statusToneMap = {
   success: "success",
   primary: "primary",
@@ -34,6 +34,26 @@ export function VehicleRegistry() {
     });
   }, [refreshKey, search, status, type]);
 
+  const handleExport = (format: "csv" | "pdf") => {
+    const headers = ["Registration", "Name", "Type", "Capacity (kg)", "Odometer (km)", "Cost", "Status", "Created At"];
+    const data = result.items.map(v => [
+      v.registrationNumber,
+      v.name,
+      v.type,
+      v.capacity,
+      v.odometerReading,
+      v.acquisitionCost,
+      v.status,
+      new Date(v.createdAt).toLocaleDateString()
+    ]);
+
+    if (format === "csv") {
+      exportToCSV("fleet_vehicles", headers, data);
+    } else {
+      exportToPDF("fleet_vehicles", "Fleet Registry Report", headers, data);
+    }
+  };
+
   return (
     <div className="grid gap-6">
       <PageHeader
@@ -59,9 +79,17 @@ export function VehicleRegistry() {
             </option>
           ))}
         </Select>
-        <Button variant="secondary" onClick={() => setRefreshKey((value) => value + 1)}>
-          Refresh
-        </Button>
+        <div className="flex gap-2 ml-auto">
+          <Button variant="secondary" onClick={() => handleExport("csv")}>
+            CSV
+          </Button>
+          <Button variant="secondary" onClick={() => handleExport("pdf")}>
+            PDF
+          </Button>
+          <Button variant="primary" onClick={() => setRefreshKey((value) => value + 1)}>
+            Refresh
+          </Button>
+        </div>
       </FilterBar>
 
       <TableWrapper>

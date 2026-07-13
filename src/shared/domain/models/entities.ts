@@ -45,6 +45,17 @@ export type Driver = {
   status: DriverStatus;
   isArchived: boolean;
   archivedAt?: string;
+  
+  // KYC Verification Fields
+  kycStatus: "PENDING" | "VERIFIED" | "FAILED";
+  kycData?: {
+    aadhaarNumber?: string;
+    verifiedName?: string;
+    dob?: string;
+    address?: string;
+    verifiedAt?: string;
+  };
+
   placeholders?: DriverPlaceholders;
   documentCount: number;
   createdAt: string;

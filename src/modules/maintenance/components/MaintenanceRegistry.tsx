@@ -8,6 +8,7 @@ import { MAINTENANCE_STATUS_COLORS } from "@/shared/domain/constants";
 import { MaintenancePriority, MaintenanceStatus } from "@/shared/domain/enums";
 import type { MaintenanceLog } from "@/shared/domain/models";
 import { Button, FilterBar, PageHeader, SearchBar, Select, StatusBadge, TableWrapper } from "@/shared/components/ui";
+import { exportToCSV, exportToPDF } from "@/shared/lib/exportUtils";
 
 const toneMap = { success: "success", primary: "primary", warning: "warning", danger: "danger", muted: "muted" } as const;
 
@@ -29,9 +30,30 @@ export function MaintenanceRegistry() {
     });
   }, [priority, refreshKey, search, status]);
 
+  const handleExport = (format: "csv" | "pdf") => {
+    const headers = ["ID", "Issue", "Type", "Priority", "Status", "Technician", "Start Date", "Expected", "Cost"];
+    const data = result.items.map(m => [
+      m.maintenanceNumber,
+      m.title,
+      m.maintenanceType,
+      m.priority,
+      m.status,
+      m.assignedTechnician,
+      new Date(m.openedAt).toLocaleDateString(),
+      new Date(m.expectedCompletionAt).toLocaleDateString(),
+      m.actualCost ?? m.estimatedCost
+    ]);
+
+    if (format === "csv") {
+      exportToCSV("fleet_maintenance", headers, data);
+    } else {
+      exportToPDF("fleet_maintenance", "Maintenance Registry Report", headers, data);
+    }
+  };
+
   return (
     <div className="grid gap-6">
-      <PageHeader title="Maintenance Registry" description="Vehicle service operations protecting fleet availability." />
+      {/* PageHeader removed to prevent duplicate titles */}
 
       <FilterBar>
         <SearchBar value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search ID, issue, or technician" />
@@ -47,7 +69,11 @@ export function MaintenanceRegistry() {
             <option key={item} value={item}>{item}</option>
           ))}
         </Select>
-        <Button variant="secondary" onClick={() => setRefreshKey((v) => v + 1)}>Refresh</Button>
+        <div className="flex gap-2 ml-auto">
+          <Button variant="secondary" onClick={() => handleExport("csv")}>CSV</Button>
+          <Button variant="secondary" onClick={() => handleExport("pdf")}>PDF</Button>
+          <Button variant="primary" onClick={() => setRefreshKey((v) => v + 1)}>Refresh</Button>
+        </div>
       </FilterBar>
 
       <TableWrapper>

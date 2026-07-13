@@ -2,25 +2,26 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { ColumnDef } from "@tanstack/react-table";
 import { fleetDriverService } from "@/modules/drivers";
 import { fleetVehicleService } from "@/modules/fleet";
 import { tripManagementService } from "@/modules/trips";
-import { TRIP_STATUS_COLORS } from "@/shared/domain/constants";
 import { TripStatus } from "@/shared/domain/enums";
 import type { Trip } from "@/shared/domain/models";
-import { Button, FilterBar, PageHeader, SearchBar, Select, StatusBadge, TableWrapper } from "@/shared/components/ui";
-
-const statusToneMap = {
-  success: "success",
-  primary: "primary",
-  warning: "warning",
-  danger: "danger",
-  muted: "muted"
-} as const;
+import {
+  Button,
+  DataTable,
+  SearchInput,
+  Select,
+  StatusBadge,
+  Toolbar
+} from "@/shared/components/ui";
+import { exportToCSV, exportToPDF } from "@/shared/lib/exportUtils";
 
 export function TripRegistry() {
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<string>("");
+  const [status, setStatus] = useState("");
+  const [page, setPage] = useState(1);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const result = useMemo(() => {
@@ -30,21 +31,117 @@ export function TripRegistry() {
       search: search ? { query: search, fields: ["tripNumber", "origin", "destination"] } : undefined,
       status: status ? (status as TripStatus) : undefined,
       sort: { field: "createdAt", direction: "desc" },
-      pagination: { page: 1, pageSize: 20 }
+      pagination: { page, pageSize: 10 }
     });
-  }, [refreshKey, search, status]);
+  }, [page, refreshKey, search, status]);
+
+  const columns = useMemo<ColumnDef<Trip>[]>(
+    () => [
+      {
+        accessorKey: "tripNumber",
+        header: "Trip ID",
+        cell: ({ row }) => <span className="font-medium text-primary">{row.original.tripNumber}</span>
+      },
+      { accessorKey: "origin", header: "Source" },
+      { accessorKey: "destination", header: "Destination" },
+      {
+        id: "vehicle",
+        header: "Vehicle",
+        cell: ({ row }) => {
+          const vehicle = row.original.vehicleId
+            ? fleetVehicleService.findVehicleRecord(row.original.vehicleId)
+            : null;
+          return vehicle?.name ?? "—";
+        }
+      },
+      {
+        id: "driver",
+        header: "Driver",
+        cell: ({ row }) => {
+          const driver = row.original.driverId ? fleetDriverService.findDriverRecord(row.original.driverId) : null;
+          return driver?.name ?? "—";
+        }
+      },
+      {
+        accessorKey: "cargoWeight",
+        header: "Cargo",
+        cell: ({ row }) => `${row.original.cargoWeight.toLocaleString()} kg`
+      },
+      {
+        accessorKey: "plannedDistance",
+        header: "Distance",
+        cell: ({ row }) => `${row.original.plannedDistance.toLocaleString()} km`
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ row }) => <StatusBadge label={row.original.status} status={row.original.status} />
+      },
+      {
+        accessorKey: "createdAt",
+        header: "Created",
+        cell: ({ row }) => (
+          <span className="text-muted">{new Date(row.original.createdAt).toLocaleDateString()}</span>
+        )
+      },
+      {
+        id: "actions",
+        header: "Actions",
+        enableSorting: false,
+        cell: ({ row }) => (
+          <Button asChild variant="ghost" className="h-8 px-2">
+            <Link href={`/trips/${row.original.id}`}>Open</Link>
+          </Button>
+        )
+      }
+    ],
+    []
+  );
+
+  const handleExport = (format: "csv" | "pdf") => {
+    const headers = ["Trip ID", "Origin", "Destination", "Vehicle", "Driver", "Cargo (kg)", "Distance (km)", "Status"];
+    const data = result.items.map(t => {
+      const vehicle = t.vehicleId ? fleetVehicleService.findVehicleRecord(t.vehicleId) : null;
+      const driver = t.driverId ? fleetDriverService.findDriverRecord(t.driverId) : null;
+      return [
+        t.tripNumber,
+        t.origin,
+        t.destination,
+        vehicle?.name ?? "—",
+        driver?.name ?? "—",
+        t.cargoWeight,
+        t.plannedDistance,
+        t.status
+      ];
+    });
+
+    if (format === "csv") {
+      exportToCSV("fleet_trips", headers, data);
+    } else {
+      exportToPDF("fleet_trips", "Trip Registry Report", headers, data);
+    }
+  };
 
   return (
     <div className="grid gap-6">
-      <PageHeader title="Trip Registry" description="Operational trip registry with dispatch-centric lifecycle control." />
-
-      <FilterBar>
-        <SearchBar
+      <Toolbar className="flex-wrap">
+        <SearchInput
+          className="min-w-[240px] flex-1"
           value={search}
-          onChange={(event) => setSearch(event.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
           placeholder="Search trip ID, source, or destination"
         />
-        <Select value={status} onChange={(event) => setStatus(event.target.value)} className="max-w-44">
+        <Select
+          value={status}
+          onChange={(e) => {
+            setStatus(e.target.value);
+            setPage(1);
+          }}
+          className="w-44"
+        >
           <option value="">All statuses</option>
           {Object.values(TripStatus).map((tripStatus) => (
             <option key={tripStatus} value={tripStatus}>
@@ -52,65 +149,23 @@ export function TripRegistry() {
             </option>
           ))}
         </Select>
-        <Button variant="secondary" onClick={() => setRefreshKey((value) => value + 1)}>
-          Refresh
-        </Button>
-      </FilterBar>
+        <div className="flex gap-2 ml-auto">
+          <Button variant="secondary" onClick={() => handleExport("csv")}>CSV</Button>
+          <Button variant="secondary" onClick={() => handleExport("pdf")}>PDF</Button>
+          <Button variant="outline" onClick={() => setRefreshKey((value) => value + 1)}>Refresh</Button>
+        </div>
+      </Toolbar>
 
-      <TableWrapper>
-        <table className="w-full min-w-[1100px] text-left text-sm">
-          <thead className="border-b border-border text-muted">
-            <tr>
-              <th className="px-4 py-3 font-medium">Trip ID</th>
-              <th className="px-4 py-3 font-medium">Source</th>
-              <th className="px-4 py-3 font-medium">Destination</th>
-              <th className="px-4 py-3 font-medium">Vehicle</th>
-              <th className="px-4 py-3 font-medium">Driver</th>
-              <th className="px-4 py-3 font-medium">Cargo</th>
-              <th className="px-4 py-3 font-medium">Distance</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium">Created</th>
-              <th className="px-4 py-3 font-medium">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {result.items.map((trip) => (
-              <TripRow key={trip.id} trip={trip} />
-            ))}
-          </tbody>
-        </table>
-      </TableWrapper>
-
-      <p className="text-sm text-muted">
-        Showing {result.items.length} of {result.total} trips
-      </p>
+      <DataTable
+        columns={columns}
+        data={result.items}
+        page={result.page}
+        pageSize={result.pageSize}
+        total={result.total}
+        onPageChange={setPage}
+        emptyTitle="No trips in registry"
+        emptyDescription="Create a dispatch lane to start operational tracking."
+      />
     </div>
-  );
-}
-
-function TripRow({ trip }: { trip: Trip }) {
-  const tone = statusToneMap[TRIP_STATUS_COLORS[trip.status] as keyof typeof statusToneMap] ?? "muted";
-  const vehicle = trip.vehicleId ? fleetVehicleService.findVehicleRecord(trip.vehicleId) : null;
-  const driver = trip.driverId ? fleetDriverService.findDriverRecord(trip.driverId) : null;
-
-  return (
-    <tr className="border-b border-border/70">
-      <td className="px-4 py-3 font-medium">{trip.tripNumber}</td>
-      <td className="px-4 py-3">{trip.origin}</td>
-      <td className="px-4 py-3">{trip.destination}</td>
-      <td className="px-4 py-3">{vehicle?.name ?? "—"}</td>
-      <td className="px-4 py-3">{driver?.name ?? "—"}</td>
-      <td className="px-4 py-3">{trip.cargoWeight.toLocaleString()} kg</td>
-      <td className="px-4 py-3">{trip.plannedDistance.toLocaleString()} km</td>
-      <td className="px-4 py-3">
-        <StatusBadge label={trip.status} tone={tone} />
-      </td>
-      <td className="px-4 py-3 text-muted">{new Date(trip.createdAt).toLocaleDateString()}</td>
-      <td className="px-4 py-3">
-        <Button asChild variant="ghost" className="h-8 px-2">
-          <Link href={`/trips/${trip.id}`}>View</Link>
-        </Button>
-      </td>
-    </tr>
   );
 }

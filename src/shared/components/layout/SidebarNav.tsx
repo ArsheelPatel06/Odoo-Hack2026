@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { icons } from "@/shared/constants";
 import { matchesAppRoute } from "@/shared/auth";
-import { NAV_GROUPS } from "@/shared/domain/constants/shell";
 import { Tooltip } from "@/shared/components/ui/Overlays";
+import { useBadgeCounts } from "@/shared/hooks/use-badge-counts";
 import { cn } from "@/shared/lib";
 
 type NavigationItem = {
@@ -12,6 +12,7 @@ type NavigationItem = {
   permission: string;
   group: string;
   accessLabel?: string;
+  badgeKey?: "trips" | "maintenance" | "alerts";
 };
 
 type SidebarNavProps = {
@@ -21,69 +22,48 @@ type SidebarNavProps = {
   onNavigate?: () => void;
 };
 
-export function SidebarNav({ items, pathname, collapsed = false, onNavigate }: SidebarNavProps) {
-  const grouped = NAV_GROUPS.map((group) => ({
-    ...group,
-    items: items.filter((item) => item.group === group.id)
-  })).filter((group) => group.items.length > 0);
+export function SidebarNav({ items, pathname, onNavigate }: SidebarNavProps) {
+  const badges = useBadgeCounts();
 
   return (
-    <nav className="grid gap-5">
-      {grouped.map((group) => (
-        <div key={group.id} className="grid gap-1">
-          {!collapsed ? (
-            <p className="px-3 text-label uppercase tracking-[0.08em] text-muted">{group.label}</p>
-          ) : (
-            <div className="mx-auto h-px w-8 bg-subtle" aria-hidden />
-          )}
+    <nav className="flex flex-col items-center gap-2" aria-label="Sidebar navigation">
+      {items.map((route) => {
+        const Icon = icons[route.icon as keyof typeof icons];
+        if (!Icon) return null;
+        
+        const isActive = matchesAppRoute(pathname, route.route);
+        
+        const badgeCount = 
+          route.route.startsWith("/trips") && route.route !== "/trips/dispatch" ? badges.trips : 
+          route.route.startsWith("/maintenance") ? badges.maintenance : 
+          route.route.startsWith("/compliance") ? badges.alerts : 0;
 
-          {group.items.map((route) => {
-            const Icon = icons[route.icon as keyof typeof icons];
-            const isActive = matchesAppRoute(pathname, route.route);
-
-            const link = (
-              <Link
-                key={`${route.permission}-${route.route}`}
-                href={route.route}
-                onClick={onNavigate}
-                aria-current={isActive ? "page" : undefined}
+        return (
+          <Tooltip key={`${route.permission}-${route.route}`} content={route.label} position="right">
+            <Link
+              href={route.route}
+              onClick={onNavigate}
+              aria-current={isActive ? "page" : undefined}
+              className={cn(
+                "relative flex size-12 items-center justify-center rounded-2xl transition-all duration-200",
+                isActive 
+                  ? "bg-slate-100 text-slate-900" 
+                  : "text-slate-400 hover:bg-slate-50 hover:text-slate-600"
+              )}
+            >
+              <Icon
                 className={cn(
-                  "group relative flex h-11 items-center gap-3 rounded-button px-3 text-body-sm text-muted transition duration-base hover:bg-muted-surface hover:text-primary",
-                  collapsed && "justify-center px-0",
-                  isActive && "bg-accent/10 text-primary ring-1 ring-accent/20"
+                  "size-[22px]",
+                  isActive ? "stroke-[2.5px]" : "stroke-[1.5px]"
                 )}
-              >
-                {isActive ? (
-                  <span
-                    className={cn(
-                      "absolute inset-y-2 left-0 w-1 rounded-full bg-accent transition-all duration-base",
-                      collapsed && "inset-y-1.5"
-                    )}
-                    aria-hidden
-                  />
-                ) : null}
-                {Icon ? <Icon className="size-4 shrink-0" /> : null}
-                {!collapsed ? (
-                  <>
-                    <span className="min-w-0 flex-1 truncate">{route.label}</span>
-                    {route.accessLabel ? <span className="text-caption text-muted">{route.accessLabel}</span> : null}
-                  </>
-                ) : null}
-              </Link>
-            );
-
-            if (collapsed) {
-              return (
-                <Tooltip key={`${route.permission}-${route.route}`} content={route.label}>
-                  {link}
-                </Tooltip>
-              );
-            }
-
-            return link;
-          })}
-        </div>
-      ))}
+              />
+              {badgeCount > 0 && (
+                <span className="absolute right-2 top-2 size-2 rounded-full bg-lime-500 ring-2 ring-white" />
+              )}
+            </Link>
+          </Tooltip>
+        );
+      })}
     </nav>
   );
 }

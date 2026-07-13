@@ -22,6 +22,18 @@ export function MaintenanceDetailView({ maintenanceId }: MaintenanceDetailViewPr
   const [laborCost, setLaborCost] = useState("");
   const [serviceNotes, setServiceNotes] = useState("");
 
+  const handleOpenComplete = () => {
+    const estimated = detail.cost.estimatedCost || 12500;
+    const parts = Math.floor(estimated * 0.55);
+    const labor = estimated - parts;
+
+    setActualCost(estimated.toString());
+    setPartsCost(parts.toString());
+    setLaborCost(labor.toString());
+    setServiceNotes("Completed all scheduled maintenance tasks. Replaced worn components and verified system integrity. Ready for dispatch.");
+    setShowComplete(true);
+  };
+
   const refresh = () => setDetail(maintenanceManagementService.getMaintenanceDetail(maintenanceId));
   const maintenanceTone = toneMap[MAINTENANCE_STATUS_COLORS[detail.maintenance.status] as keyof typeof toneMap] ?? "muted";
 
@@ -108,7 +120,7 @@ export function MaintenanceDetailView({ maintenanceId }: MaintenanceDetailViewPr
 
       {detail.maintenance.status === MaintenanceStatus.Active ? (
         <Card>
-          <Button onClick={() => setShowComplete(true)}>Complete Maintenance</Button>
+          <Button onClick={handleOpenComplete}>Complete Maintenance</Button>
         </Card>
       ) : null}
 

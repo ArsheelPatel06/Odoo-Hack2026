@@ -106,15 +106,26 @@ type TooltipProps = {
   content: ReactNode;
   children: ReactNode;
   className?: string;
+  position?: "top" | "bottom" | "left" | "right";
 };
 
-export function Tooltip({ content, children, className }: TooltipProps) {
+export function Tooltip({ content, children, className, position = "top" }: TooltipProps) {
+  const positionClasses = {
+    top: "bottom-[calc(100%+8px)] left-1/2 -translate-x-1/2",
+    bottom: "top-[calc(100%+8px)] left-1/2 -translate-x-1/2",
+    left: "right-[calc(100%+8px)] top-1/2 -translate-y-1/2",
+    right: "left-[calc(100%+8px)] top-1/2 -translate-y-1/2",
+  };
+
   return (
     <span className={cn("group relative inline-flex", className)}>
       {children}
       <span
         role="tooltip"
-        className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-30 hidden -translate-x-1/2 rounded-input border border-subtle bg-popover px-2 py-1 text-caption text-secondary shadow-soft group-hover:block"
+        className={cn(
+          "pointer-events-none absolute z-50 hidden rounded-input border border-subtle bg-slate-800 px-2.5 py-1 text-xs font-medium text-white shadow-soft group-hover:block whitespace-nowrap",
+          positionClasses[position]
+        )}
       >
         {content}
       </span>

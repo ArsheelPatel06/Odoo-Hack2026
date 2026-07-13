@@ -1,11 +1,10 @@
 "use client";
 
-import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import Link from "next/link";
+import { BookOpen, HelpCircle } from "lucide-react";
 import { SidebarBrand } from "@/shared/components/layout/SidebarBrand";
 import { SidebarNav } from "@/shared/components/layout/SidebarNav";
-import { Button } from "@/shared/components/ui";
-import { SIDEBAR_WIDTH_COLLAPSED, SIDEBAR_WIDTH_EXPANDED, useShellStore } from "@/shared/store/shell-store";
-import { cn } from "@/shared/lib";
+import { Tooltip } from "@/shared/components/ui/Overlays";
 
 type AppSidebarProps = {
   pathname: string;
@@ -13,35 +12,36 @@ type AppSidebarProps = {
 };
 
 export function AppSidebar({ pathname, navigation }: AppSidebarProps) {
-  const { sidebarCollapsed, toggleSidebar } = useShellStore();
-  const width = sidebarCollapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH_EXPANDED;
-
   return (
     <aside
-      className="fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-subtle bg-sidebar shadow-soft transition-[width] duration-slow ease-out md:flex"
-      style={{ width }}
+      className="flex h-full w-[72px] flex-col items-center rounded-[24px] bg-white py-6 shadow-soft"
       aria-label="Primary navigation"
     >
-      <div className={cn("flex h-16 items-center border-b border-subtle px-4", sidebarCollapsed && "justify-center px-3")}>
-        <SidebarBrand collapsed={sidebarCollapsed} />
+      {/* Brand header */}
+      <div className="mb-8 flex shrink-0 items-center justify-center">
+        <SidebarBrand collapsed={true} />
       </div>
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4">
-        <SidebarNav items={navigation} pathname={pathname} collapsed={sidebarCollapsed} />
+      {/* Navigation */}
+      <div className="flex-1 w-full px-3">
+        <SidebarNav items={navigation} pathname={pathname} collapsed={true} />
       </div>
 
-      <div className={cn("border-t border-subtle p-3", sidebarCollapsed && "flex justify-center")}>
-        <Button
-          variant="ghost"
-          size={sidebarCollapsed ? "icon" : "sm"}
-          className={cn(!sidebarCollapsed && "w-full justify-start")}
-          onClick={toggleSidebar}
-          aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          title={sidebarCollapsed ? "Expand sidebar (⌘B)" : "Collapse sidebar (⌘B)"}
-        >
-          {sidebarCollapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
-          {!sidebarCollapsed ? <span className="text-body-sm">Collapse</span> : null}
-        </Button>
+      {/* Bottom actions */}
+      <div className="flex flex-col items-center gap-4 shrink-0 pt-4">
+        {/* Support icon */}
+        <Tooltip content="Support" position="right">
+          <Link href="#" aria-label="Support" className="flex size-10 items-center justify-center rounded-[12px] text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900">
+            <HelpCircle className="size-5" />
+          </Link>
+        </Tooltip>
+
+        {/* Docs icon */}
+        <Tooltip content="Documentation" position="right">
+          <Link href="/docs" aria-label="Documentation" className="flex size-10 items-center justify-center rounded-[12px] text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900">
+            <BookOpen className="size-5" />
+          </Link>
+        </Tooltip>
       </div>
     </aside>
   );

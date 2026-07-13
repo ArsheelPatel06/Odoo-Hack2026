@@ -138,6 +138,11 @@ export class TripManagementService implements ITripManagementService {
     return buildDispatchValidationSummary({ trip, vehicle, driver });
   }
 
+  updateTripStatus(tripId: string, status: TripStatus): void {
+    const trip = this.getTripById(tripId);
+    this.repository.update(tripId, { status });
+  }
+
   dispatchTrip(tripId: string) {
     const trip = this.getTripById(tripId);
 

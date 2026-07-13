@@ -86,6 +86,7 @@ export class FleetDriverService implements IFleetDriverService {
         accidentHistory: "Placeholder",
         emergencyContact: "Placeholder"
       },
+      kycStatus: "PENDING",
       createdAt: timestamp,
       updatedAt: timestamp
     };
@@ -142,6 +143,15 @@ export class FleetDriverService implements IFleetDriverService {
 
     this.eventRepository.append(id, DriverArchived.create({ driverId: id, timestamp }));
     return archived;
+  }
+
+  updateKycStatus(id: string, kycStatus: "PENDING" | "VERIFIED" | "FAILED", kycData?: { aadhaarNumber?: string; verifiedName?: string; dob?: string; address?: string; verifiedAt?: string; }) {
+    const driver = this.getDriverById(id);
+    return this.repository.update(id, {
+      kycStatus,
+      kycData: kycData || driver.kycData,
+      updatedAt: nowIso()
+    });
   }
 
   suspendDriver(id: string) {

@@ -7,6 +7,7 @@ import { fuelManagementService } from "@/modules/financial";
 import { tripManagementService } from "@/modules/trips";
 import type { FuelLog } from "@/shared/domain/models";
 import { Button, FilterBar, PageHeader, SearchBar, Select, TableWrapper } from "@/shared/components/ui";
+import { exportToCSV, exportToPDF } from "@/shared/lib/exportUtils";
 
 export function FuelRegistry() {
   const [search, setSearch] = useState("");
@@ -26,10 +27,34 @@ export function FuelRegistry() {
     });
   }, [refreshKey, search, vehicleId]);
 
+  const handleExport = (format: "csv" | "pdf") => {
+    const headers = ["Fuel ID", "Trip ID", "Vehicle", "Date", "Odometer", "Quantity (L)", "Cost", "Station"];
+    const data = result.items.map(f => {
+      const vehicle = fleetVehicleService.findVehicleRecord(f.vehicleId);
+      const trip = tripManagementService.getTripById(f.tripId);
+      return [
+        f.fuelLogNumber,
+        trip.tripNumber,
+        vehicle?.name ?? "—",
+        new Date(f.loggedAt).toLocaleDateString(),
+        f.odometerReading,
+        f.fuelQuantity,
+        f.fuelCost,
+        f.fuelStation
+      ];
+    });
+
+    if (format === "csv") {
+      exportToCSV("fleet_fuel", headers, data);
+    } else {
+      exportToPDF("fleet_fuel", "Fuel Registry Report", headers, data);
+    }
+  };
+
   return (
     <div className="grid gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <PageHeader title="Fuel Logs" description="Operational fuel records tied to completed trips." />
+        {/* PageHeader removed to prevent duplicate titles */}
         <Button asChild>
           <Link href="/fuel/new">Log fuel</Link>
         </Button>
@@ -45,9 +70,13 @@ export function FuelRegistry() {
             </option>
           ))}
         </Select>
-        <Button variant="secondary" onClick={() => setRefreshKey((v) => v + 1)}>
-          Refresh
-        </Button>
+        <div className="flex gap-2 ml-auto">
+          <Button variant="secondary" onClick={() => handleExport("csv")}>CSV</Button>
+          <Button variant="secondary" onClick={() => handleExport("pdf")}>PDF</Button>
+          <Button variant="primary" onClick={() => setRefreshKey((v) => v + 1)}>
+            Refresh
+          </Button>
+        </div>
       </FilterBar>
 
       <TableWrapper>

@@ -44,3 +44,5 @@ export * from "./StatCard";
 export * from "./TableWrapper";
 export * from "./EmptyState";
 export * from "./LoadingSkeleton";
+export * from "./CircularGauge";
+export * from "./EmailSenderModal";

@@ -1,3 +1,4 @@
+import { Radar } from "lucide-react";
 import { cn } from "@/shared/lib";
 
 type SidebarBrandProps = {
@@ -8,13 +9,20 @@ type SidebarBrandProps = {
 export function SidebarBrand({ collapsed = false, className }: SidebarBrandProps) {
   return (
     <div className={cn("flex items-center gap-3", className)}>
-      <div className="grid size-10 shrink-0 place-items-center rounded-card bg-accent text-sm font-bold text-inverse shadow-soft">
-        TO
+      {/* Logo mark — indigo/violet gradient */}
+      <div className="relative grid size-9 shrink-0 place-items-center overflow-hidden rounded-[10px] bg-gradient-to-br from-indigo-500 to-violet-600 shadow-[0_2px_12px_rgba(99,102,241,0.4)]">
+        <Radar className="size-5 text-white drop-shadow-sm" strokeWidth={2.5} />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
       </div>
+
       {!collapsed ? (
         <div className="min-w-0">
-          <div className="truncate text-base font-semibold text-primary">TransitOps</div>
-          <div className="truncate text-caption text-muted">Operations Console</div>
+          <div className="truncate text-[15px] font-semibold leading-tight tracking-[-0.02em] text-white">
+            TransitOps
+          </div>
+          <div className="truncate text-[11px] font-medium leading-tight text-slate-500">
+            Smart Transport Operations
+          </div>
         </div>
       ) : null}
     </div>

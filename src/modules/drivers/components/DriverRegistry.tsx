@@ -8,6 +8,7 @@ import { DRIVER_STATUS_COLORS } from "@/shared/domain/constants";
 import { DriverStatus, LicenseCategory } from "@/shared/domain/enums";
 import type { Driver } from "@/shared/domain/models";
 import { Badge, Button, FilterBar, PageHeader, SearchBar, Select, StatusBadge, TableWrapper } from "@/shared/components/ui";
+import { exportToCSV, exportToPDF } from "@/shared/lib/exportUtils";
 
 const statusToneMap = {
   success: "success",
@@ -39,12 +40,29 @@ export function DriverRegistry() {
     });
   }, [licenseCategory, licenseExpiry, minSafetyScore, refreshKey, search, status]);
 
+  const handleExport = (format: "csv" | "pdf") => {
+    const headers = ["Name", "License Number", "Category", "Expiry Date", "Phone", "Email", "Safety Score", "Status"];
+    const data = result.items.map(d => [
+      d.name,
+      d.licenseNumber,
+      d.licenseCategory,
+      new Date(d.licenseExpiresAt).toLocaleDateString(),
+      d.phone,
+      d.email,
+      d.safetyScore,
+      d.status
+    ]);
+
+    if (format === "csv") {
+      exportToCSV("fleet_drivers", headers, data);
+    } else {
+      exportToPDF("fleet_drivers", "Driver Registry Report", headers, data);
+    }
+  };
+
   return (
     <div className="grid gap-6">
-      <PageHeader
-        title="Driver Registry"
-        description="Operational workforce registry with compliance visibility for safety officers."
-      />
+      {/* PageHeader removed to prevent duplicate titles */}
 
       <FilterBar>
         <SearchBar
@@ -80,9 +98,17 @@ export function DriverRegistry() {
           <option value="90">90+</option>
           <option value="85">85+</option>
         </Select>
-        <Button variant="secondary" onClick={() => setRefreshKey((value) => value + 1)}>
-          Refresh
-        </Button>
+        <div className="flex gap-2 ml-auto">
+          <Button variant="secondary" onClick={() => handleExport("csv")}>
+            CSV
+          </Button>
+          <Button variant="secondary" onClick={() => handleExport("pdf")}>
+            PDF
+          </Button>
+          <Button variant="primary" onClick={() => setRefreshKey((value) => value + 1)}>
+            Refresh
+          </Button>
+        </div>
       </FilterBar>
 
       <TableWrapper>

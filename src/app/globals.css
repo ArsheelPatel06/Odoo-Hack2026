@@ -2,78 +2,57 @@
 @tailwind components;
 @tailwind utilities;
 
+@import "leaflet/dist/leaflet.css";
+
+/* Fix Leaflet Tile Rendering with Tailwind */
+.leaflet-container img {
+  max-width: none !important;
+}
+.leaflet-container {
+  z-index: 1;
+}
+
 :root {
   color-scheme: light;
   --font-inter: Inter, system-ui, sans-serif;
 
   /* Background */
-  --background-page: #fafafa;
+  --background-page: #f2f1f0; /* Very light gray map background style */
   --background-surface: #ffffff;
   --background-card: #ffffff;
-  --background-sidebar: #f8fafc;
+  --background-sidebar: #ffffff;
   --background-popover: #ffffff;
-  --background-muted: #f1f5f9;
+  --background-muted: #f8f8f8;
 
   /* Text */
-  --text-primary: #0f172a;
-  --text-secondary: #334155;
-  --text-muted: #64748b;
+  --text-primary: #171717; /* High contrast black */
+  --text-secondary: #404040;
+  --text-muted: #737373;
   --text-inverse: #ffffff;
 
   /* Border */
-  --border-subtle: #e2e8f0;
-  --border-strong: #cbd5e1;
+  --border-subtle: #e5e5e5;
+  --border-strong: #d4d4d4;
 
   /* Accent & states */
-  --accent: #4f46e5;
-  --accent-hover: #4338ca;
-  --success: #16a34a;
-  --warning: #d97706;
-  --danger: #dc2626;
-  --info: #2563eb;
+  --accent: #171717; /* Black primary buttons */
+  --accent-hover: #262626;
+  --success: #c6f928; /* Vibrant lime green */
+  --warning: #facc15;
+  --danger: #ef4444;
+  --info: #e5d4ff; /* Soft purple */
 
   /* Radius */
-  --radius-button: 12px;
+  --radius-button: 24px; /* Fully rounded buttons */
   --radius-input: 12px;
   --radius-card: 20px;
   --radius-dialog: 24px;
 
   /* Shadows */
-  --shadow-soft: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
-  --shadow-elevated: 0 4px 12px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.04);
-  --shadow-panel: 0 12px 32px rgba(15, 23, 42, 0.1);
-  --overlay: rgba(15, 23, 42, 0.24);
-}
-
-.dark {
-  color-scheme: dark;
-
-  --background-page: #0b0f17;
-  --background-surface: #111827;
-  --background-card: #151c2c;
-  --background-sidebar: #0f1524;
-  --background-popover: #151c2c;
-  --background-muted: #1e293b;
-
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
-  --text-inverse: #ffffff;
-
-  --border-subtle: #1e293b;
-  --border-strong: #334155;
-
-  --accent: #6366f1;
-  --accent-hover: #818cf8;
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --danger: #ef4444;
-  --info: #3b82f6;
-
-  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.24), 0 1px 3px rgba(0, 0, 0, 0.18);
-  --shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.28);
-  --shadow-panel: 0 18px 48px rgba(0, 0, 0, 0.35);
-  --overlay: rgba(2, 6, 23, 0.55);
+  --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02);
+  --shadow-elevated: 0 12px 48px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+  --shadow-panel: 0 16px 40px rgba(0, 0, 0, 0.12);
+  --overlay: rgba(23, 23, 23, 0.15);
 }
 
 * {
@@ -168,6 +147,28 @@ body {
     line-height: 1.35;
     font-weight: 400;
   }
+
+  /* Sidebar dark-context nav links */
+  .sidebar-link {
+    @apply relative flex h-10 items-center gap-3 rounded-[10px] px-3 text-[13px] font-medium text-slate-400 transition-all duration-200 hover:bg-white/5 hover:text-slate-100;
+  }
+
+  .sidebar-link.active {
+    @apply bg-indigo-500/15 text-white;
+  }
+
+  .sidebar-link-icon-only {
+    @apply relative flex h-10 w-10 items-center justify-center rounded-[10px] text-slate-400 transition-all duration-200 hover:bg-white/5 hover:text-slate-100;
+  }
+
+  .sidebar-link-icon-only.active {
+    @apply bg-indigo-500/15 text-white;
+  }
+
+  /* Premium card base */
+  .premium-card {
+    @apply rounded-[20px] border border-subtle bg-surface p-6 shadow-soft;
+  }
 }
 
 @layer utilities {
@@ -176,44 +177,43 @@ body {
   }
 
   .animate-slide-up {
-    animation: slide-up 200ms ease-out;
+    animation: slide-up 220ms ease-out;
   }
 
   .animate-scale-in {
-    animation: scale-in 200ms ease-out;
+    animation: scale-in 180ms ease-out;
+  }
+
+  .animate-shimmer {
+    animation: shimmer 1.6s linear infinite;
+  }
+
+  .animate-pulse-dot {
+    animation: pulse-dot 2s ease-in-out infinite;
   }
 }
 
 @keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.98);
-  }
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
 
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.85); }
 }

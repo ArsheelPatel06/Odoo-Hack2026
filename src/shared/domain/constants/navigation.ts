@@ -71,19 +71,11 @@ export const SIDEBAR_NAVIGATION = [
     group: "fleet"
   },
   {
-    label: "Fuel & Expenses",
+    label: "Fuel",
     route: APP_ROUTES.fuel,
     module: "fuel",
     icon: "fuel",
     permission: "fuel.view",
-    group: "finance"
-  },
-  {
-    label: "Expenses",
-    route: APP_ROUTES.expenses,
-    module: "expenses",
-    icon: "expenses",
-    permission: "expenses.view",
     group: "finance"
   },
   {

@@ -47,12 +47,15 @@ import {
   VehicleReturnedToFleet
 } from "@/core/events";
 import { MaintenanceStatus, TripStatus } from "@/shared/domain/enums";
-import { seedExpenses } from "@/shared/mock-data/expenses";
-import { seedFleetDrivers } from "@/shared/mock-data/drivers";
-import { seedFleetVehicles } from "@/shared/mock-data/fleet";
-import { seedFuelLogs } from "@/shared/mock-data/fuel";
-import { seedMaintenanceRecords } from "@/shared/mock-data/maintenance";
-import { seedTrips } from "@/shared/mock-data/trips";
+import { generateSeedData } from "@/shared/mock-data/seeder";
+
+const seedData = generateSeedData();
+const seedFleetVehicles = seedData.vehicles;
+const seedFleetDrivers = seedData.drivers;
+const seedTrips = seedData.trips;
+const seedFuelLogs = seedData.fuelLogs;
+const seedExpenses = seedData.expenses;
+const seedMaintenanceRecords = seedData.maintenanceLogs;
 
 const vehicleRepository = new InMemoryVehicleRepository(seedFleetVehicles);
 const vehicleEventRepository = new InMemoryVehicleEventRepository();
