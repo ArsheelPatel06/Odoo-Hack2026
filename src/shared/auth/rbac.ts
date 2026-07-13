@@ -45,12 +45,19 @@ export function getActiveNavigationItem(pathname: string, items: ReturnType<type
     .sort((left, right) => right.route.length - left.route.length)[0];
 }
 
-export function getRoutePermission(pathname: string) {
-  const match = SIDEBAR_NAVIGATION.filter((item) => matchesAppRoute(pathname, item.route)).sort(
+export function getRoutePermissions(pathname: string): string[] {
+  // Find all navigation items that match this route
+  const matches = SIDEBAR_NAVIGATION.filter((item) => matchesAppRoute(pathname, item.route)).sort(
     (left, right) => right.route.length - left.route.length
-  )[0];
-
-  return match?.permission ?? null;
+  );
+  
+  // Return all unique permissions associated with the longest matched route
+  if (matches.length === 0) return [];
+  
+  const longestRouteLength = matches[0].route.length;
+  return matches
+    .filter((m) => m.route.length === longestRouteLength)
+    .map((m) => m.permission);
 }
 
 export type RouteAccessResult = "allow" | "unauthenticated" | "unauthorized";
@@ -69,10 +76,14 @@ export function evaluateRouteAccess(input: {
     return "unauthorized";
   }
 
-  const requiredPermission = getRoutePermission(input.pathname);
+  const validPermissions = getRoutePermissions(input.pathname);
 
-  if (requiredPermission && !hasPermission(input.permissions, requiredPermission)) {
-    return "unauthorized";
+  // If the route maps to specific permissions, user must have at least one
+  if (validPermissions.length > 0) {
+    const hasAny = validPermissions.some((perm) => hasPermission(input.permissions, perm));
+    if (!hasAny) {
+      return "unauthorized";
+    }
   }
 
   return "allow";

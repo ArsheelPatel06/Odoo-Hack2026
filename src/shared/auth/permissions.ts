@@ -4,7 +4,7 @@ export {
   evaluateRouteAccess,
   getAllowedNavigation,
   getRoleAccess,
-  getRoutePermission,
+  getRoutePermissions,
   hasPermission
 } from "./rbac";
 

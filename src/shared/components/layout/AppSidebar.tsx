@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { BookOpen, HelpCircle } from "lucide-react";
+import { BookOpen, HelpCircle, LogOut } from "lucide-react";
 import { SidebarBrand } from "@/shared/components/layout/SidebarBrand";
 import { SidebarNav } from "@/shared/components/layout/SidebarNav";
 import { Tooltip } from "@/shared/components/ui/Overlays";
+import { useSession } from "@/shared/providers/SessionProvider";
+import { useRouter } from "next/navigation";
 
 type AppSidebarProps = {
   pathname: string;
@@ -12,6 +14,14 @@ type AppSidebarProps = {
 };
 
 export function AppSidebar({ pathname, navigation }: AppSidebarProps) {
+  const { logout } = useSession();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
+
   return (
     <aside
       className="flex h-full w-[72px] flex-col items-center rounded-[24px] bg-white py-6 shadow-soft"
@@ -41,6 +51,17 @@ export function AppSidebar({ pathname, navigation }: AppSidebarProps) {
           <Link href="/docs" aria-label="Documentation" className="flex size-10 items-center justify-center rounded-[12px] text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900">
             <BookOpen className="size-5" />
           </Link>
+        </Tooltip>
+
+        {/* Logout icon */}
+        <Tooltip content="Logout" position="right">
+          <button 
+            onClick={handleLogout}
+            aria-label="Logout" 
+            className="flex size-10 items-center justify-center rounded-[12px] text-slate-400 transition-colors hover:bg-slate-100 hover:text-red-500 mt-2"
+          >
+            <LogOut className="size-5" />
+          </button>
         </Tooltip>
       </div>
     </aside>

@@ -35,7 +35,7 @@ export default function LandingPage() {
             <span className="text-2xl font-black text-black tracking-tighter uppercase">TransitOps</span>
           </div>
           <Link 
-            href="/dashboard"
+            href="/login"
             className="px-5 py-2 rounded-full bg-white text-black text-sm font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
           >
             Enter App
@@ -74,7 +74,7 @@ export default function LandingPage() {
           
           <motion.div variants={fadeInUp}>
             <Link 
-              href="/dashboard"
+              href="/login"
               className="inline-flex items-center gap-2 px-10 py-5 bg-[#4D90FE] text-white text-xl font-black border-4 border-black hover:bg-[#3b7bed] transition-all shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[4px] hover:translate-x-[4px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] uppercase rounded-xl"
             >
               START DISPATCHING <ArrowRight className="size-6" strokeWidth={3} />
@@ -209,7 +209,7 @@ export default function LandingPage() {
           </motion.h2>
           <motion.div variants={fadeInUp}>
             <Link 
-              href="/dashboard"
+              href="/login"
               className="inline-flex items-center justify-center px-10 py-5 bg-[#FFDF00] text-black text-2xl font-black border-4 border-black hover:bg-white transition-all shadow-[12px_12px_0px_0px_rgba(255,51,102,1)] hover:translate-y-[4px] hover:translate-x-[4px] hover:shadow-[8px_8px_0px_0px_rgba(255,51,102,1)] uppercase rounded-xl group"
             >
               Launch Platform

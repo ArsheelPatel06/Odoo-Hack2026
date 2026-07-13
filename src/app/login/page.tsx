@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, Truck } from "lucide-react";
 import { toast } from "sonner";
 import { MOCK_USERS } from "@/shared/auth";
 import { Button, Card, Input, Select } from "@/shared/components/ui";
@@ -10,15 +10,15 @@ import { useSession } from "@/shared/providers/SessionProvider";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { hasHydrated, isAuthenticated, login } = useSession();
+  const { hasHydrated, isAuthenticated, login, logout } = useSession();
   const [email, setEmail] = useState(MOCK_USERS[0].email);
   const [password, setPassword] = useState("demo-password");
 
   useEffect(() => {
-    if (hasHydrated && isAuthenticated) {
-      router.replace("/dashboard");
+    if (hasHydrated) {
+      logout();
     }
-  }, [hasHydrated, isAuthenticated, router]);
+  }, [hasHydrated, logout]);
 
   const selectedUser = MOCK_USERS.find((user) => user.email === email);
 
@@ -41,8 +41,8 @@ export default function LoginPage() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(37,99,235,0.18),transparent_45%)]" />
       <div className="relative w-full max-w-md animate-fade-in">
         <div className="mb-8 text-center">
-          <div className="mx-auto grid size-14 place-items-center rounded-card bg-primary text-lg font-bold text-white shadow-panel">
-            TO
+          <div className="mx-auto flex size-14 items-center justify-center rounded-xl bg-[#FF3366] text-white font-bold border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <Truck className="size-7" />
           </div>
           <h1 className="mt-5 text-3xl font-semibold tracking-normal">TransitOps</h1>
           <p className="mt-2 text-sm text-muted">Secure access to the operations console.</p>
